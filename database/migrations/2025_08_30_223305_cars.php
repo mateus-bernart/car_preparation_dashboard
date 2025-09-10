@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string("brand");
             $table->string("model");
             $table->integer("year")->nullable();
-            $table->string("status")->default('active'); // 1-active, 2-inactive
+            $table->string("status")->default(1); // 1-active, 2-inactive
             $table->timestamps();
         });
     }

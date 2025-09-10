@@ -13,11 +13,11 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
     {
-        title: 'Cars',
+        title: 'Carros',
         href: '/cars',
     },
     {
-        title: 'Add car',
+        title: 'Adicionar carro',
         href: '/cars/create',
     },
 ];

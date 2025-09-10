@@ -4,7 +4,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Car, LayoutGrid } from 'lucide-react';
+import { Car, Check, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -14,9 +14,14 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Cars',
+        title: 'Carros',
         href: '/cars',
         icon: Car,
+    },
+    {
+        title: 'Checklist',
+        href: '/checklists',
+        icon: Check,
     },
 ];
 
