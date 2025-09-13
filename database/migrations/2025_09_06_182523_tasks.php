@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create("tasks", function (Blueprint $table) {
             $table->bigIncrements("id");
-            $table->foreignId("id_checklist")->constrained("checklists")->noActionOnDelete();
-            $table->text("description");
-            $table->integer("status");
+            $table->foreignId("id_checklist")->constrained("checklists")->onDelete('cascade');
+            $table->text("description")->nullable();
+            $table->integer("status")->default(1);
             $table->timestamps();
         });
     }

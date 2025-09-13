@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create("checklists", function (Blueprint $table) {
+        Schema::create("car_checklist", function (Blueprint $table) {
             $table->bigIncrements("id");
-            $table->foreignId("id_user")->constrained("users")->noActionOnDelete();
-            $table->foreignId("id_category")->constrained("categories")->noActionOnDelete();
-            $table->string("description")->nullable();
-            $table->integer("status")->default(1);
-            $table->timestamps();
+            $table->foreignId("id_car")->constrained('cars')->onDelete('cascade');
+            $table->foreignId("id_checklist")->constrained('checklists')->onDelete('cascade');
         });
     }
 

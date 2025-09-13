@@ -12,15 +12,19 @@ class ChecklistController extends Controller
 {
     public function index()
     {
-        $cars = Checklist::all();
-        return inertia('Checklist/Index')->with('cars', $cars);
+        $checklists = Checklist::with(['cars' => function ($query) {
+            $query->where('status', 1);
+        }, 'tasks' => function ($query) {
+            $query->where('status', 1);
+        }])->get();
+        return inertia('Checklist/Index')->with(['checklists' => $checklists]);
     }
 
     public function create()
     {
         $categories = Category::all();
         $cars = Car::where('status', 1)->get();
-        $tasks = Task::all();
+        $tasks = Task::where('status', 1)->get();
         return inertia('Checklist/Create')->with(['categories' => $categories, 'cars' => $cars, 'tasks' => $tasks]);
     }
 
@@ -30,23 +34,28 @@ class ChecklistController extends Controller
 
         $validated = $request->validate([
             'description' => 'nullable|string|max:1000',
-            'id_car' => 'required|integer',
+            'cars' => 'required|array',
             'id_category' => 'required|integer',
             'tasks' => 'required|array|min:1',
+            'tasks.*' => 'required|string|max:255',
         ], [
             'description.max' => 'O campo descrição não pode exceder 1000 caracteres.',
-            'id_car.required' => 'Selecione um carro.',
+            'cars.required' => 'Selecione um carro.',
             'id_category.required' => 'Selecione uma categoria.',
-            'tasks.required' => 'Informe ao menos uma tarefa!'
+            'tasks.required' => 'Informe ao menos uma tarefa!',
+            'tasks.*.required' => 'Informe o conteúdo de uma tarefa!',
+            'tasks.*.string' => 'Cada tarefa precisa ser um texto válido.',
+            'tasks.*.max' => 'Cada tarefa pode ter no máximo 255 caracteres.',
         ]);
 
         $checklist = Checklist::create([
-            'id_car' => $validated['id_car'],
             'id_user' => $user_id,
             'id_category' => $validated['id_category'],
             'description' => $validated['description'],
             'status' => 1,
         ]);
+
+        $checklist->cars()->sync($validated['cars']);
 
         foreach ($validated['tasks'] as $task) {
             Task::create([
@@ -57,21 +66,12 @@ class ChecklistController extends Controller
             ]);
         }
 
-        $cars = Checklist::all();
-        return inertia('Checklist/Index')->with(['success' => 'Checklistro adicionado com sucesso.', 'cars' => $cars]);
+        return redirect()->route('checklists.index')->with("success", "Checklist criada com sucesso!");
     }
 
-    public function destroy(Checklist $car)
+    public function destroy(Checklist $checklist)
     {
-        $car->delete();
-        $cars = Checklist::all();
-        return inertia('Checklist/Index')->with(['cars' => $cars]);
-    }
-
-    public function storeTask(Request $request)
-    {
-        $validated = $request->validate([
-            'description' => 'required|string'
-        ]);
+        $checklist->delete();
+        return redirect()->route('checklists.index')->with('success', 'Checklist removido com sucesso!');
     }
 }

@@ -11,4 +11,9 @@ class Car extends Model
     'model',
     'year',
   ];
+
+  public function checklists()
+  {
+    return $this->belongsToMany(Checklist::class, 'car_checklist', 'id_car', 'id_checklist');
+  }
 }

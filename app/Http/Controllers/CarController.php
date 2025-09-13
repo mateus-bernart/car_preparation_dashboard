@@ -20,7 +20,6 @@ class CarController extends Controller
 
     public function store(Request $request)
     {
-
         $validated = $request->validate([
             'brand' => 'required|string|max:255',
             'model' => 'required|string|max:255',
@@ -37,22 +36,19 @@ class CarController extends Controller
         ]);
 
         Car::create($validated);
-        $cars = Car::all();
-        return inertia('Car/Index')->with(['success' => 'Carro adicionado com sucesso.', 'cars' => $cars]);
+        return redirect()->route('cars.index')->with('success', 'Carro adicionado com sucesso.');
     }
 
     public function destroy(Car $car)
     {
         $car->delete();
-        $cars = Car::all();
-        return redirect()->route('cars.index')->with(['cars' => $cars]);
+        return redirect()->route('cars.index')->with('success', "Carro removido com sucesso!");
     }
 
     public function toggleStatus(Car $car)
     {
-        $car->status === 'ativo' ? $car->status = 'inativo' : $car->status = 'ativo';
+        $car->status === 1 ? $car->status = 2 : $car->status = 1;
         $car->save();
-        $cars = Car::all();
-        return redirect()->route('cars.index', ['cars' => $cars]);
+        return redirect()->route('cars.index');
     }
 }

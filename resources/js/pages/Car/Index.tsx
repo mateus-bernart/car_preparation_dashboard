@@ -39,7 +39,6 @@ type PageProps = {
 
 export default function Cars() {
     const { props } = usePage<PageProps>();
-    // const [query, setQuery] = useState<string>('');
     const { delete: destroy, processing, put } = useForm();
 
     useEffect(() => {
@@ -49,11 +48,7 @@ export default function Cars() {
     }, [props, props.success]);
 
     const handleDeleteCar = (id: number) => {
-        destroy(`/cars/${id}`, {
-            onSuccess: () => {
-                toast.success('Carro removido com sucesso!');
-            },
-        });
+        destroy(`/cars/${id}`);
     };
 
     const handleUpdateStatus = (id: number) => {
@@ -82,22 +77,24 @@ export default function Cars() {
             header: 'Status',
             cell: ({ row }) => {
                 const car = row.original;
+                console.log('car: ', car);
 
-                const statusOption = car.status === 'ativo' ? 'inativo' : 'ativo';
+                const statusOption = car.status.toString() === '1' ? 'ativo' : 'inativo';
+                const statusText = car.status.toString() === '1' ? 'inativo' : 'ativo';
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className={car.status === 'ativo' ? 'bg-green-100 hover:bg-green-200' : 'bg-red-100 hover:bg-red-200'}
+                                className={car.status.toString() === '1' ? 'bg-green-100 hover:bg-green-200' : 'bg-red-100 hover:bg-red-200'}
                             >
-                                {car.status}
+                                {statusOption}
                                 <ChevronDown />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => handleUpdateStatus(car.id)}>{statusOption}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleUpdateStatus(car.id)}>{statusText}</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
@@ -140,7 +137,7 @@ export default function Cars() {
 
             <div className="my-4 ml-4">
                 <Link href={'/cars/create'}>
-                    <Button className="text-md cursor-pointer bg-green-600 font-bold hover:bg-green-700">Adicionar carro</Button>
+                    <Button className="text-md cursor-pointer bg-green-600 font-bold shadow-lg hover:bg-green-700">Adicionar carro</Button>
                 </Link>
             </div>
             <div className="m-4">
