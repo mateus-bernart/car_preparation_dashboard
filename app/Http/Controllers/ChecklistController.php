@@ -12,11 +12,7 @@ class ChecklistController extends Controller
 {
     public function index()
     {
-        $checklists = Checklist::with(['cars' => function ($query) {
-            $query->where('status', 1);
-        }, 'tasks' => function ($query) {
-            $query->where('status', 1);
-        }])->get();
+        $checklists = Checklist::with(['cars', 'tasks'])->get();
         return inertia('Checklist/Index')->with(['checklists' => $checklists]);
     }
 
@@ -61,7 +57,7 @@ class ChecklistController extends Controller
             Task::create([
                 'id_checklist' => $checklist->id,
                 'description' => $task,
-                'status' => 1,
+                'status' => 0,
                 'created_at' => now(),
             ]);
         }

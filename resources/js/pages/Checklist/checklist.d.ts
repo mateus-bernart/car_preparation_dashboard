@@ -1,9 +1,11 @@
 import { Car } from '../Car/car';
+import { Category } from './category';
 import { Task } from './task';
 
 type Checklist = {
     cars: Car[];
     tasks: Task[];
+    categories: Category[];
     id: number;
     description: string;
     id_car: number;

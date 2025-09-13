@@ -14,13 +14,13 @@ class CarSeeder extends Seeder
     public function run(): void
     {
         DB::table('cars')->insert([
-            'brand' => 'Creta',
-            'model' => 'Fiat',
+            'brand' => 'Hyunday',
+            'model' => 'Creta',
             'year' => 2024,
         ]);
         DB::table('cars')->insert([
-            'brand' => 'Uno',
-            'model' => 'Fiat',
+            'brand' => 'Fiat',
+            'model' => 'Uno',
             'year' => 2023,
         ]);
     }

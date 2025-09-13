@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements("id");
             $table->foreignId("id_checklist")->constrained("checklists")->onDelete('cascade');
             $table->text("description")->nullable();
-            $table->integer("status")->default(1);
+            $table->integer("status")->default(0);
             $table->timestamps();
         });
     }

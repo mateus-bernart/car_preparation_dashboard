@@ -72,7 +72,7 @@ export default function Checklists({ categories, cars }: { categories: Category[
         const newTasks = [...taskFields];
         newTasks[index] = value;
         setTaskFields(newTasks);
-        setError('tasks', '');
+        setError(`tasks.${index}`, '');
     };
 
     return (

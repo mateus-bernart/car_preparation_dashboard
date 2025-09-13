@@ -30,7 +30,7 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
 
     const [tasksChecked, setTasksChecked] = useState<number[]>([]);
 
-    const { delete: destroy } = useForm<ChecklistFormData>({
+    const { delete: destroy, put } = useForm<ChecklistFormData>({
         id: 0,
     });
 
@@ -42,7 +42,10 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
 
     const handleTaskComplete = (id: number) => {
         setTasksChecked((prev) => (prev.includes(id) ? prev.filter((taskId) => taskId !== id) : [...prev, id]));
+        put(`/tasks/${id}`);
     };
+
+    console.log('tasks checked: ', tasksChecked);
 
     const handleDeleteChecklist = (id: number) => {
         destroy(`/checklists/${id}`);
@@ -65,12 +68,19 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                         </CardHeader>
                         <CardContent>
                             <div>
-                                {checklist.tasks.map((task) => (
-                                    <div className="flex items-center gap-2" key={task.id}>
-                                        <Checkbox onCheckedChange={() => handleTaskComplete(task.id)} checked={tasksChecked.includes(task.id)} />
-                                        <h1>{task.description}</h1>
-                                    </div>
-                                ))}
+                                {checklist.tasks.map((task) => {
+                                    console.log('task: ', task);
+
+                                    return (
+                                        <div className="flex items-center gap-2" key={task.id}>
+                                            <Checkbox
+                                                onCheckedChange={() => handleTaskComplete(task.id)}
+                                                checked={tasksChecked.includes(task.id) || Boolean(task.status)}
+                                            />
+                                            <h1>{task.description}</h1>
+                                        </div>
+                                    );
+                                })}
                                 <Dialog>
                                     <DialogTrigger>
                                         <div className="absolute top-2 right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800">
