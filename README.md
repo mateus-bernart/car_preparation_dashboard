@@ -1,0 +1,1 @@
+The purpose of this system is managing the state of cars based on a checklist to each one. Providing smart data to delaerships of how much time a car spends to be ready due to its checking dependencies (mechanics, painting, eletronics, etc). 
