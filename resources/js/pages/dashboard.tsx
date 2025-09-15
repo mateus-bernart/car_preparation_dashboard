@@ -16,8 +16,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard({ cars }: { cars: Car[] }) {
-    console.log(cars);
-
     function filterCars(event: React.ChangeEvent<HTMLInputElement>) {
         console.log(event.target.value);
     }

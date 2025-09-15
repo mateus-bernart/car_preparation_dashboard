@@ -1,11 +1,14 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Edit, Trash } from 'lucide-react';
+import { Clock, Edit, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Checklist, ChecklistFormData } from './checklist';
@@ -30,9 +33,11 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
 
     const [tasksChecked, setTasksChecked] = useState<number[]>([]);
 
-    const { delete: destroy, put } = useForm<ChecklistFormData>({
+    const { delete: destroy, post } = useForm<ChecklistFormData>({
         id: 0,
     });
+
+    console.log('checklists: ', checklists);
 
     useEffect(() => {
         if (props.success) {
@@ -42,10 +47,8 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
 
     const handleTaskComplete = (id: number) => {
         setTasksChecked((prev) => (prev.includes(id) ? prev.filter((taskId) => taskId !== id) : [...prev, id]));
-        put(`/tasks/${id}`);
+        post(`/tasks/${id}`);
     };
-
-    console.log('tasks checked: ', tasksChecked);
 
     const handleDeleteChecklist = (id: number) => {
         destroy(`/checklists/${id}`);
@@ -59,64 +62,115 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                     <Button className="text-md cursor-pointer bg-green-600 font-bold shadow-lg hover:bg-green-700">Adicionar checklist</Button>
                 </Link>
             </div>
-            {checklists.map((checklist, index) => (
-                <div key={index}>
-                    <Card className="relative mx-6 my-2 transition-all hover:shadow-lg">
-                        <CardHeader>
-                            <h1 className="font-serif text-xl font-bold"> Checklist {checklist.id}</h1>
-                            <h3 className="text-muted-foreground">{checklist.description}</h3>
-                        </CardHeader>
-                        <CardContent>
-                            <div>
-                                {checklist.tasks.map((task) => {
-                                    console.log('task: ', task);
+            {checklists.map((checklist, index) => {
+                const car = checklist.cars.find((car) => car.id_checklist === checklist.id);
 
-                                    return (
-                                        <div className="flex items-center gap-2" key={task.id}>
-                                            <Checkbox
-                                                onCheckedChange={() => handleTaskComplete(task.id)}
-                                                checked={tasksChecked.includes(task.id) || Boolean(task.status)}
-                                            />
-                                            <h1>{task.description}</h1>
-                                        </div>
-                                    );
-                                })}
-                                <Dialog>
-                                    <DialogTrigger>
-                                        <div className="absolute top-2 right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800">
-                                            <Edit color="white" size={20}></Edit>
-                                        </div>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Editar {checklist.id}</DialogTitle>
-                                            <DialogDescription>{checklist.description}</DialogDescription>
-                                        </DialogHeader>
-                                    </DialogContent>
-                                </Dialog>
-                                <Dialog>
-                                    <DialogTrigger>
-                                        <div className="absolute top-2 right-2 cursor-pointer rounded-sm bg-red-600 p-2 shadow-lg transition-all hover:bg-red-800">
-                                            <Trash color="white" size={20}></Trash>
-                                        </div>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Deletar checklist {checklist.id}?</DialogTitle>
-                                            <DialogDescription>Tem certeza? </DialogDescription>
-                                        </DialogHeader>
-                                        <DialogFooter>
-                                            <Button className="cursor-pointer" onClick={() => handleDeleteChecklist(checklist.id)}>
-                                                Confirmar
-                                            </Button>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            ))}
+                const priorityColors: Record<number, string> = {
+                    1: 'bg-green-500',
+                    2: 'bg-amber-500',
+                    3: 'bg-red-500',
+                };
+
+                const completedTasks = checklist.tasks.filter((t) => t.status === 1).length;
+                const totalTasks = checklist.tasks.length;
+
+                return (
+                    <div key={index}>
+                        <Card className="relative mx-6 my-2 transition-all hover:shadow-lg">
+                            <CardHeader className="flex flex-row flex-wrap gap-5">
+                                <h1 className="font-serif text-xl font-bold">
+                                    Checklist {car?.brand} {car?.model} {car?.year}
+                                </h1>
+                                <div className={`${car ? priorityColors[car.id_priority] : ''} rounded-sm px-2 py-1 text-sm font-bold`}>
+                                    <span className="">{car?.priority.description}</span>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="mb-5 space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">Progress</span>
+                                        <span className="font-medium text-card-foreground">{checklist.progress}%</span>
+                                    </div>
+                                    <Progress value={checklist?.progress} className="h-2" />
+                                    <div className="text-xs text-muted-foreground">
+                                        {completedTasks} of {totalTasks} tasks completed
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                    <Label className="flex gap-2 text-muted-foreground">
+                                        <Clock size={15} />
+                                        Task Checklist
+                                    </Label>
+                                    <div className="max-h-52 space-y-2 overflow-y-auto">
+                                        {checklist.tasks.map((task) => {
+                                            console.log('task: ', task);
+
+                                            return (
+                                                <div
+                                                    className={`${Boolean(task.status) === true ? 'border border-green-200 bg-green-50' : 'border bg-muted/30'} rounded-md bg-accent p-2 py-4 transition-all duration-50`}
+                                                    key={task.id}
+                                                    onClick={() => handleTaskComplete(task.id)}
+                                                >
+                                                    <div className="flex justify-between">
+                                                        <div className="flex flex-1 items-center gap-2">
+                                                            <Checkbox
+                                                                checked={tasksChecked.includes(task.id) || Boolean(task.status)}
+                                                                className="cursor-pointer"
+                                                            />
+                                                            <h1
+                                                                className={`text-sm ${task.status ? 'text-muted-foreground line-through' : 'text-card-foreground'}`}
+                                                            >
+                                                                {task.description}
+                                                            </h1>
+                                                        </div>
+
+                                                        <Badge variant="outline" className="text-xs">
+                                                            {task.category.description}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <Dialog>
+                                        <DialogTrigger>
+                                            <div className="absolute top-[-1rem] right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800 sm:top-2">
+                                                <Edit color="white" size={20}></Edit>
+                                            </div>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Editar {checklist.id}</DialogTitle>
+                                                <DialogDescription></DialogDescription>
+                                            </DialogHeader>
+                                        </DialogContent>
+                                    </Dialog>
+                                    <Dialog>
+                                        <DialogTrigger>
+                                            <div className="absolute top-[-1rem] right-2 cursor-pointer rounded-sm bg-red-600 p-2 shadow-lg transition-all hover:bg-red-800 sm:top-2">
+                                                <Trash color="white" size={20}></Trash>
+                                            </div>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Deletar checklist {checklist.id}?</DialogTitle>
+                                                <DialogDescription>Tem certeza? </DialogDescription>
+                                            </DialogHeader>
+                                            <DialogFooter>
+                                                <Button className="cursor-pointer" onClick={() => handleDeleteChecklist(checklist.id)}>
+                                                    Confirmar
+                                                </Button>
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                );
+            })}
             {checklists.length === 0 && (
                 <div className="flex items-center justify-center">
                     <span className="text-muted-foreground">Não há checklists. Clique em "Adicionar checklist"</span>

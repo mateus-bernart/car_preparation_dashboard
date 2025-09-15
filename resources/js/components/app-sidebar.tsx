@@ -19,7 +19,7 @@ const mainNavItems: NavItem[] = [
         icon: Car,
     },
     {
-        title: 'Checklist',
+        title: 'Checklists',
         href: '/checklists',
         icon: Check,
     },

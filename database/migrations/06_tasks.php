@@ -13,8 +13,14 @@ return new class extends Migration
     {
         Schema::create("tasks", function (Blueprint $table) {
             $table->bigIncrements("id");
-            $table->foreignId("id_checklist")->constrained("checklists")->onDelete('cascade');
-            $table->text("description")->nullable();
+            $table->foreignId("id_car")->nullable()->constrained('cars')->onDelete('set null');
+
+            $table->unsignedBigInteger('id_checklist')->nullable();
+            $table->foreign("id_checklist")->references("id")->on('checklists')->onDelete('cascade');
+
+            $table->foreignId("id_category")->nullable()->constrained('categories')->onDelete('set null');
+
+            $table->text("description");
             $table->integer("status")->default(0);
             $table->timestamps();
         });

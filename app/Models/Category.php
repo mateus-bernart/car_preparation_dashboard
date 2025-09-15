@@ -11,4 +11,9 @@ class Category extends Model
     "description",
     "status",
   ];
+
+  public function tasks()
+  {
+    return $this->hasMany(Task::class, "id_category", "id");
+  }
 }
