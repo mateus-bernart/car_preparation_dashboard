@@ -1,18 +1,20 @@
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MultiSelect } from '@/components/ui/multi-select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { format } from 'date-fns';
+import { CalendarCheck, ChevronDownIcon, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { Car } from '../Car/car';
 import { Category } from './category';
+import { Priority } from './priority';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -30,21 +32,24 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 type ChecklistForm = {
-    description: string;
-    id_category: string;
-    cars: string[];
-    tasks: string[];
+    id_priority: string;
+    id_car: string;
+    customer: string;
+    tasks: { id: number; task: string; id_category: string }[];
 };
 
-export default function Checklists({ categories, cars }: { categories: Category[]; cars: Car[] }) {
-    const [taskFields, setTaskFields] = useState<string[]>(['']);
-    const [selectedCars, setSelectedCars] = useState<string[]>([]);
+export default function Checklists({ categories, cars, priorities }: { categories: Category[]; cars: Car[]; priorities: Priority[] }) {
+    const [taskFields, setTaskFields] = useState<{ id: number; task: string; id_category: string }[]>([{ id: 0, task: '', id_category: '' }]);
+    const [selectedCar, setSelectedCar] = useState('');
+    const [priority, setPriority] = useState('');
+    const [customer, setCustomer] = useState('');
+    const [deliveryDate, setDeliveryDate] = useState<Date>();
 
-    const { data, setData, errors, setError } = useForm<ChecklistForm>({
-        description: '',
-        id_category: '',
-        cars: [],
-        tasks: [],
+    const { data, errors, setError } = useForm<ChecklistForm>({
+        id_priority: '',
+        customer: '',
+        id_car: '',
+        tasks: [{ id: 0, task: '', id_category: '' }],
     });
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -53,7 +58,10 @@ export default function Checklists({ categories, cars }: { categories: Category[
         const payload = {
             ...data,
             tasks: taskFields,
-            cars: selectedCars,
+            id_car: selectedCar,
+            id_priority: priority,
+            customer: customer,
+            delivery_date: deliveryDate ? format(deliveryDate, 'yyyy-MM-dd') : null,
         };
 
         router.post('/checklists', payload, {
@@ -65,14 +73,16 @@ export default function Checklists({ categories, cars }: { categories: Category[
     };
 
     const handleAddTask = () => {
-        setTaskFields((prev) => [...prev, '']);
+        setTaskFields((prev) => [...prev, { id: Date.now(), task: '', id_category: '' }]);
     };
 
-    const handleUpdateTaskFields = (index: number, value: string) => {
-        const newTasks = [...taskFields];
-        newTasks[index] = value;
-        setTaskFields(newTasks);
-        setError(`tasks.${index}`, '');
+    const handleRemoveTask = (index: number) => {
+        setTaskFields((prev) => prev.filter((p) => p.id !== index));
+    };
+
+    const handleUpdateTaskFields = (index: number, value: string, field: string) => {
+        setTaskFields((prev) => prev.map((task, i) => (i === index ? { ...task, [field]: value } : task)));
+        setError(`tasks.${index}.task`, '');
     };
 
     return (
@@ -85,81 +95,157 @@ export default function Checklists({ categories, cars }: { categories: Category[
                     <form onSubmit={handleSubmit}>
                         <div className="flex flex-col gap-4 sm:flex-col md:flex-col lg:flex-row">
                             <div className="flex flex-1 flex-col gap-4">
-                                <div className="flex w-2xs flex-col gap-2">
-                                    <Label>Categoria</Label>
-                                    <Select
-                                        onValueChange={(value) => {
-                                            setData('id_category', value);
-                                            setError('id_category', '');
-                                        }}
-                                        defaultValue={data.id_category}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecione uma categoria" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {categories.map((category) => (
-                                                <SelectItem key={category.id} value={category.id.toString()} className="font-bold">
-                                                    {category.description}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.id_category}></InputError>
+                                <div className="flex gap-4">
+                                    <div className="flex flex-1 flex-col gap-2">
+                                        <Label>
+                                            <span className="text-red-400">* </span>Carro
+                                        </Label>
+
+                                        <Select
+                                            onValueChange={(value) => {
+                                                setError('id_car', '');
+                                                return setSelectedCar(value);
+                                            }}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Selecione" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {cars.map((car) => (
+                                                    <SelectItem value={car.id.toString()} key={car.id}>
+                                                        {car.brand} - {car.model} - {car.year}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={errors.id_car}></InputError>
+                                    </div>
+
+                                    <div className="flex flex-1 flex-col gap-2">
+                                        <Label>
+                                            <span className="text-red-400">* </span>Prioridade
+                                        </Label>
+
+                                        <Select
+                                            onValueChange={(value) => {
+                                                setError('id_priority', '');
+                                                return setPriority(value);
+                                            }}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Selecione" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {priorities.map((p) => (
+                                                    <SelectItem key={p.id} value={p.id.toString()}>
+                                                        {p.description}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={errors.id_priority}></InputError>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="flex flex-1 flex-col gap-2">
+                                        <Label>Cliente</Label>
+
+                                        <Input
+                                            value={customer}
+                                            placeholder={`Informe`}
+                                            onChange={(e) => {
+                                                setError('customer', '');
+                                                return setCustomer(e.target.value);
+                                            }}
+                                        ></Input>
+                                    </div>
+                                    <div className="flex flex-1 flex-col gap-2">
+                                        <Label>Data de entrega</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" id="date-picker" className="justify-between font-normal">
+                                                    <div className="flex gap-2">
+                                                        <CalendarCheck color="gray" />
+                                                        {deliveryDate ? deliveryDate.toLocaleDateString() : 'Selecione'}
+                                                    </div>
+                                                    <ChevronDownIcon />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={deliveryDate}
+                                                    captionLayout="dropdown"
+                                                    onSelect={(date) => {
+                                                        setDeliveryDate(date);
+                                                    }}
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
                                 </div>
 
-                                <div className="flex w-2xs flex-col gap-2">
-                                    <Label>Carro</Label>
+                                <div className="flex flex-col gap-2 rounded-md bg-muted p-5 shadow-md">
+                                    <Label>
+                                        <span className="text-red-400">* </span>Tarefas
+                                    </Label>
 
-                                    <MultiSelect
-                                        hideSelectAll
-                                        searchable={false}
-                                        placeholder="Selecione o(s) carro(s)"
-                                        options={cars.map((car) => ({
-                                            value: car.id.toString(),
-                                            label: `${car.brand} - ${car.model} - ${car.year}`,
-                                        }))}
-                                        defaultValue={selectedCars}
-                                        onValueChange={(values) => {
-                                            setSelectedCars(values);
-                                            setError('cars', '');
-                                        }}
-                                    />
-                                    <InputError message={errors.cars}></InputError>
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <Label>Descrição</Label>
-                                    <Textarea
-                                        placeholder="Descrição da checklist (opcional)"
-                                        value={data.description}
-                                        onChange={(e) => setData('description', e.target.value)}
-                                    />
-                                    <InputError message={errors.description}></InputError>
-                                </div>
-
-                                <div className="flex flex-col gap-4">
-                                    <Label>Tarefas</Label>
                                     {taskFields.map((task, index) => (
                                         <div key={index}>
-                                            <div className="flex w-2/3 flex-row gap-2">
-                                                <Input
-                                                    value={task}
-                                                    placeholder={`Tarefa ${index + 1}`}
-                                                    onChange={(e) => handleUpdateTaskFields(index, e.target.value)}
-                                                ></Input>
-                                                {index === taskFields.length - 1 && (
+                                            <div className="flex gap-2">
+                                                <div className="flex w-full flex-row gap-2">
+                                                    <Input
+                                                        value={task.task}
+                                                        placeholder={`Tarefa ${index + 1}`}
+                                                        onChange={(e) => handleUpdateTaskFields(index, e.target.value, 'task')}
+                                                    ></Input>
+                                                    <div className="flex flex-col gap-2">
+                                                        <Select
+                                                            onValueChange={(value) => {
+                                                                handleUpdateTaskFields(index, value, 'id_category');
+                                                                setError(`tasks.${index}.id_category`, '');
+                                                            }}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Categoria" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {categories.map((category) => (
+                                                                    <SelectItem
+                                                                        key={category.id}
+                                                                        value={category.id.toString()}
+                                                                        className="font-bold"
+                                                                    >
+                                                                        {category.description}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+
+                                                {index === taskFields.length - 1 ? (
                                                     <Button
-                                                        className="bg-green-700 hover:bg-green-800"
+                                                        className="bg-green-700 hover:cursor-pointer hover:bg-green-800 hover:shadow-md"
                                                         variant={'outline'}
                                                         type="button"
                                                         onClick={handleAddTask}
                                                     >
                                                         <Plus color="white" />
                                                     </Button>
+                                                ) : (
+                                                    <Button
+                                                        className="bg-red-700 hover:cursor-pointer hover:bg-red-800 hover:shadow-md"
+                                                        variant={'outline'}
+                                                        type="button"
+                                                        onClick={() => handleRemoveTask(task.id)}
+                                                    >
+                                                        <X color="white" />
+                                                    </Button>
                                                 )}
                                             </div>
-                                            <InputError message={errors[`tasks.${index}`]} />
+                                            <InputError message={errors[`tasks.${index}.task`]} />
+                                            <InputError message={errors[`tasks.${index}.id_category`]} />
                                         </div>
                                     ))}
                                 </div>

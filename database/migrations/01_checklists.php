@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create("checklists", function (Blueprint $table) {
             $table->bigIncrements("id");
             $table->foreignId("id_user")->constrained("users")->noActionOnDelete();
-            $table->foreignId("id_category")->constrained("categories")->noActionOnDelete();
-            $table->string("description")->nullable();
             $table->integer("status")->default(1);
+            $table->integer("progress")->default(0);
             $table->timestamps();
         });
     }

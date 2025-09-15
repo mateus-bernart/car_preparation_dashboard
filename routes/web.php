@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/checklists/{checklist}', [ChecklistController::class, 'destroy'])->name('checklists.destroy');
 
     // ============= Tasks ================
-    Route::put('/tasks/{task}', [TaskController::class, 'checkTask'])->name('check');
+    Route::post('/tasks/{task}', [TaskController::class, 'checkTask'])->name('check');
 });
 
 require __DIR__ . '/settings.php';

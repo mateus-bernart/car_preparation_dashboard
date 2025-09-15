@@ -77,8 +77,6 @@ export default function Cars() {
             header: 'Status',
             cell: ({ row }) => {
                 const car = row.original;
-                console.log('car: ', car);
-
                 const statusOption = car.status.toString() === '1' ? 'ativo' : 'inativo';
                 const statusText = car.status.toString() === '1' ? 'inativo' : 'ativo';
                 return (
