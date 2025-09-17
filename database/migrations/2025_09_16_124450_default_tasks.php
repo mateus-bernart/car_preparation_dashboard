@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create("checklists", function (Blueprint $table) {
+        Schema::create("default_tasks", function (Blueprint $table) {
             $table->bigIncrements("id");
-            $table->foreignId("id_user")->constrained("users")->noActionOnDelete();
-            $table->integer("status")->default(1);
-            $table->integer("progress")->default(0);
-            $table->timestamps();
+            $table->unsignedBigInteger("id_category");
+            $table->string("description");
+            $table->integer("status");
         });
     }
 

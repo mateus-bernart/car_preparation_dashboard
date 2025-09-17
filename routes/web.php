@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ============ Checklists ============
     Route::get('/checklists', [ChecklistController::class, 'index'])->name('checklists.index');
     Route::get('/checklists/create', [ChecklistController::class, 'create'])->name('checklists.create');
+    Route::get('/checklists/{checklist}/edit', [ChecklistController::class, 'edit'])->name('checklists.edit');
     Route::post('/checklists', [ChecklistController::class, 'store'])->name('checklists.store');
     Route::delete('/checklists/{checklist}', [ChecklistController::class, 'destroy'])->name('checklists.destroy');
 

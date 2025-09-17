@@ -37,8 +37,6 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
         id: 0,
     });
 
-    console.log('checklists: ', checklists);
-
     useEffect(() => {
         if (props.success) {
             toast.success(props.success);
@@ -66,7 +64,9 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
             </div>
             <div className="flex flex-col flex-wrap sm:flex-row">
                 {checklists.map((checklist, index) => {
-                    const car = checklist.cars.find((car) => car.id_checklist === checklist.id);
+                    console.log('checklist: ', checklist);
+                    
+                    const car = checklist.car;
 
                     const priorityColors: Record<number, string> = {
                         1: 'bg-green-500',
@@ -131,8 +131,6 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                     </Label>
                                     <div className="max-h-52 space-y-2 overflow-y-auto">
                                         {checklist.tasks.map((task) => {
-                                            console.log('task: ', task);
-
                                             return (
                                                 <div
                                                     className={`${Boolean(task.status) === true ? 'border border-green-200 bg-green-50' : 'border bg-muted/30'} rounded-md bg-accent p-2 py-4 transition-all duration-50`}
@@ -161,19 +159,11 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                         })}
                                     </div>
 
-                                    <Dialog>
-                                        <DialogTrigger>
-                                            <div className="absolute top-[-1rem] right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800 sm:top-2">
-                                                <Edit color="white" size={20}></Edit>
-                                            </div>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>Editar {checklist.id}</DialogTitle>
-                                                <DialogDescription></DialogDescription>
-                                            </DialogHeader>
-                                        </DialogContent>
-                                    </Dialog>
+                                    <div className="absolute top-[-1rem] right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800 sm:top-2">
+                                        <Link href={`/checklists/${checklist.id}/edit`}>
+                                            <Edit color="white" size={20}></Edit>
+                                        </Link>
+                                    </div>
                                     <Dialog>
                                         <DialogTrigger>
                                             <div className="absolute top-[-1rem] right-2 cursor-pointer rounded-sm bg-red-600 p-2 shadow-lg transition-all hover:bg-red-800 sm:top-2">

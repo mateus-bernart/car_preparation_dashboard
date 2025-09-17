@@ -11,8 +11,6 @@ return new class extends Migration
     {
         Schema::create("cars", function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("id_checklist")->nullable();
-            $table->foreign("id_checklist")->references("id")->on('checklists')->onDelete('set null');
             $table->unsignedBigInteger("id_priority")->nullable();
             $table->foreign("id_priority")->references("id")->on('priorities')->onDelete('set null');
             $table->integer("status")->default(1);
