@@ -16,4 +16,9 @@ class Category extends Model
   {
     return $this->hasMany(Task::class, "id_category", "id");
   }
+
+  public function defaultTasks()
+  {
+    return $this->hasMany(DefaultTask::class, "id_category", "id");
+  }
 }

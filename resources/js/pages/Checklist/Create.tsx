@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
@@ -35,20 +36,33 @@ type ChecklistForm = {
     id_priority: string;
     id_car: string;
     customer: string;
+    include_default_tasks: boolean;
     tasks: { id: number; task: string; id_category: string }[];
 };
 
-export default function Checklists({ categories, cars, priorities }: { categories: Category[]; cars: Car[]; priorities: Priority[] }) {
+export default function Checklists({
+    categories,
+    cars,
+    priorities,
+    // checklist,
+}: {
+    categories: Category[];
+    cars: Car[];
+    priorities: Priority[];
+    // checklist: Checklist;
+}) {
     const [taskFields, setTaskFields] = useState<{ id: number; task: string; id_category: string }[]>([{ id: 0, task: '', id_category: '' }]);
     const [selectedCar, setSelectedCar] = useState('');
     const [priority, setPriority] = useState('');
     const [customer, setCustomer] = useState('');
     const [deliveryDate, setDeliveryDate] = useState<Date>();
+    const [defaultTask, setDefaultTask] = useState<boolean>(false);
 
     const { data, errors, setError } = useForm<ChecklistForm>({
         id_priority: '',
         customer: '',
         id_car: '',
+        include_default_tasks: false,
         tasks: [{ id: 0, task: '', id_category: '' }],
     });
 
@@ -60,6 +74,7 @@ export default function Checklists({ categories, cars, priorities }: { categorie
             tasks: taskFields,
             id_car: selectedCar,
             id_priority: priority,
+            include_default_tasks: defaultTask,
             customer: customer,
             delivery_date: deliveryDate ? format(deliveryDate, 'yyyy-MM-dd') : null,
         };
@@ -145,6 +160,10 @@ export default function Checklists({ categories, cars, priorities }: { categorie
                                         </Select>
                                         <InputError message={errors.id_priority}></InputError>
                                     </div>
+                                    <div className="flex flex-1 flex-col gap-2">
+                                        <Label>Incluir tarefas padrão?</Label>
+                                        <Switch checked={defaultTask} onCheckedChange={(val) => setDefaultTask(val)} />
+                                    </div>
                                 </div>
                                 <div className="flex gap-2">
                                     <div className="flex flex-1 flex-col gap-2">
@@ -186,9 +205,7 @@ export default function Checklists({ categories, cars, priorities }: { categorie
                                 </div>
 
                                 <div className="flex flex-col gap-2 rounded-md bg-muted p-5 shadow-md">
-                                    <Label>
-                                        <span className="text-red-400">* </span>Tarefas
-                                    </Label>
+                                    <Label>Tarefas adicionais</Label>
 
                                     {taskFields.map((task, index) => (
                                         <div key={index}>
@@ -246,6 +263,7 @@ export default function Checklists({ categories, cars, priorities }: { categorie
                                             </div>
                                             <InputError message={errors[`tasks.${index}.task`]} />
                                             <InputError message={errors[`tasks.${index}.id_category`]} />
+                                            <InputError message={errors[`tasks`]} />
                                         </div>
                                     ))}
                                 </div>

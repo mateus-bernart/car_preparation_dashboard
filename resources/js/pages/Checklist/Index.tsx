@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Clock, Edit, Trash } from 'lucide-react';
+import { CalendarCheck, Car, Clock, Edit, Trash, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Checklist, ChecklistFormData } from './checklist';
@@ -37,8 +37,6 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
         id: 0,
     });
 
-    console.log('checklists: ', checklists);
-
     useEffect(() => {
         if (props.success) {
             toast.success(props.success);
@@ -47,7 +45,9 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
 
     const handleTaskComplete = (id: number) => {
         setTasksChecked((prev) => (prev.includes(id) ? prev.filter((taskId) => taskId !== id) : [...prev, id]));
-        post(`/tasks/${id}`);
+        post(`/tasks/${id}`, {
+            preserveScroll: true,
+        });
     };
 
     const handleDeleteChecklist = (id: number) => {
@@ -62,27 +62,33 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                     <Button className="text-md cursor-pointer bg-green-600 font-bold shadow-lg hover:bg-green-700">Adicionar checklist</Button>
                 </Link>
             </div>
-            {checklists.map((checklist, index) => {
-                const car = checklist.cars.find((car) => car.id_checklist === checklist.id);
+            <div className="flex flex-col flex-wrap sm:flex-row">
+                {checklists.map((checklist, index) => {
+                    console.log('checklist: ', checklist);
+                    
+                    const car = checklist.car;
 
-                const priorityColors: Record<number, string> = {
-                    1: 'bg-green-500',
-                    2: 'bg-amber-500',
-                    3: 'bg-red-500',
-                };
+                    const priorityColors: Record<number, string> = {
+                        1: 'bg-green-500',
+                        2: 'bg-amber-500',
+                        3: 'bg-red-500',
+                    };
 
-                const completedTasks = checklist.tasks.filter((t) => t.status === 1).length;
-                const totalTasks = checklist.tasks.length;
+                    const completedTasks = checklist.tasks.filter((t) => t.status === 1).length;
+                    const totalTasks = checklist.tasks.length;
 
-                return (
-                    <div key={index}>
-                        <Card className="relative mx-6 my-2 transition-all hover:shadow-lg">
-                            <CardHeader className="flex flex-row flex-wrap gap-5">
-                                <h1 className="font-serif text-xl font-bold">
-                                    Checklist {car?.brand} {car?.model} {car?.year}
-                                </h1>
-                                <div className={`${car ? priorityColors[car.id_priority] : ''} rounded-sm px-2 py-1 text-sm font-bold`}>
-                                    <span className="">{car?.priority.description}</span>
+                    return (
+                        <Card key={index} className="relative m-2 flex-1 transition-all hover:shadow-lg sm:max-w-[50%]">
+                            <CardHeader>
+                                <div className="flex flex-col gap-2">
+                                    <h1 className="flex gap-2 font-semibold text-card-foreground">
+                                        <Car color="darkblue" /> {car?.brand} {car?.model} {car?.year}
+                                    </h1>
+                                    <div
+                                        className={`${car ? priorityColors[car.id_priority] : ''} mb-4 w-16 rounded-sm px-2 py-1 text-center text-sm font-bold`}
+                                    >
+                                        <span>{car?.priority.description}</span>
+                                    </div>
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -97,6 +103,27 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                     </div>
                                 </div>
 
+                                <div className="mb-6 flex-col gap-3 text-sm">
+                                    {car?.customer && (
+                                        <div className="flex gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <User className="h-4 w-4 text-muted-foreground" />
+                                                <span className="text-muted-foreground">Cliente:</span>
+                                            </div>
+                                            <span className="font-medium text-card-foreground">{car?.customer}</span>
+                                        </div>
+                                    )}
+                                    {car?.delivery_date && (
+                                        <div className="flex gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+                                                <span className="text-muted-foreground">Delivery:</span>
+                                            </div>
+                                            <span className="font-medium text-card-foreground">{car?.delivery_date}</span>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="flex flex-col gap-2">
                                     <Label className="flex gap-2 text-muted-foreground">
                                         <Clock size={15} />
@@ -104,8 +131,6 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                     </Label>
                                     <div className="max-h-52 space-y-2 overflow-y-auto">
                                         {checklist.tasks.map((task) => {
-                                            console.log('task: ', task);
-
                                             return (
                                                 <div
                                                     className={`${Boolean(task.status) === true ? 'border border-green-200 bg-green-50' : 'border bg-muted/30'} rounded-md bg-accent p-2 py-4 transition-all duration-50`}
@@ -134,19 +159,11 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                         })}
                                     </div>
 
-                                    <Dialog>
-                                        <DialogTrigger>
-                                            <div className="absolute top-[-1rem] right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800 sm:top-2">
-                                                <Edit color="white" size={20}></Edit>
-                                            </div>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>Editar {checklist.id}</DialogTitle>
-                                                <DialogDescription></DialogDescription>
-                                            </DialogHeader>
-                                        </DialogContent>
-                                    </Dialog>
+                                    <div className="absolute top-[-1rem] right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800 sm:top-2">
+                                        <Link href={`/checklists/${checklist.id}/edit`}>
+                                            <Edit color="white" size={20}></Edit>
+                                        </Link>
+                                    </div>
                                     <Dialog>
                                         <DialogTrigger>
                                             <div className="absolute top-[-1rem] right-2 cursor-pointer rounded-sm bg-red-600 p-2 shadow-lg transition-all hover:bg-red-800 sm:top-2">
@@ -168,9 +185,9 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                 </div>
                             </CardContent>
                         </Card>
-                    </div>
-                );
-            })}
+                    );
+                })}
+            </div>
             {checklists.length === 0 && (
                 <div className="flex items-center justify-center">
                     <span className="text-muted-foreground">Não há checklists. Clique em "Adicionar checklist"</span>

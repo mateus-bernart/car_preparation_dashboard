@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             CarSeeder::class,
             PrioritySeed::class,
+            DefaultTasksSeeder::class,
         ]);
     }
 }

@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Checklist extends Model
 {
   protected $fillable = [
+    "id_car",
     "id_user",
     "status",
+    "progress",
   ];
 
   public function tasks()
@@ -16,8 +18,8 @@ class Checklist extends Model
     return $this->hasMany(Task::class, 'id_checklist', 'id');
   }
 
-  public function cars()
+  public function car()
   {
-    return $this->hasMany(Car::class, 'id_checklist', 'id');
+    return $this->belongsTo(Car::class, 'id_car', 'id');
   }
 }

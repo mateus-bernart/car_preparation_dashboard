@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Car extends Model
 {
   protected $fillable = [
-    'id_checklist',
     'id_priority',
     'brand',
     'model',
@@ -19,12 +18,7 @@ class Car extends Model
 
   public function checklist()
   {
-    return $this->belongsTo(Checklist::class, 'id_checklist', 'id');
-  }
-
-  public function tasks()
-  {
-    return $this->hasMany(Task::class, 'id_car', 'id');
+    return $this->hasMany(Checklist::class, 'id_car', 'id');
   }
 
   public function priority()

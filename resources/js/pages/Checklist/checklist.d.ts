@@ -2,7 +2,7 @@ import { Car } from '../Car/car';
 import { Task } from './task';
 
 type Checklist = {
-    cars: Car[];
+    car: Car;
     tasks: Task[];
     progress: number;
     id: number;
