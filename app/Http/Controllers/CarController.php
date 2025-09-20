@@ -45,9 +45,9 @@ class CarController extends Controller
         return redirect()->route('cars.index')->with('success', "Carro removido com sucesso!");
     }
 
-    public function toggleStatus(Car $car)
+    public function toggleActive(Car $car)
     {
-        $car->status === 1 ? $car->status = 2 : $car->status = 1;
+        $car->active === 1 ? $car->active = 2 : $car->active = 1;
         $car->save();
         return redirect()->route('cars.index');
     }

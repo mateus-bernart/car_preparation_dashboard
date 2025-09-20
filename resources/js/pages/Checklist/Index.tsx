@@ -3,13 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
-import { CalendarCheck, Car, Clock, Edit, Trash, User } from 'lucide-react';
+import { CalendarCheck, Car, Clock, Edit, Search, Trash, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Checklist, ChecklistFormData } from './checklist';
@@ -33,6 +34,7 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
     const { props } = usePage<PageProps>();
 
     const [tasksChecked, setTasksChecked] = useState<number[]>([]);
+    const [search, setSearch] = useState('');
 
     const { delete: destroy, post } = useForm<ChecklistFormData>({
         id: 0,
@@ -55,6 +57,28 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
         destroy(`/checklists/${id}`);
     };
 
+    console.log('checklist: ', checklists);
+
+    const filteredCarChecklist = checklists.filter((checklist) => {
+        const car = checklist.car;
+
+        let deliveryDate = '';
+        if (car.delivery_date) {
+            // garante que vem no formato certo
+            const parsed = parseISO(car.delivery_date); // "2025-09-21"
+            deliveryDate = format(parsed, 'dd/MM/yyyy'); // "21/09/2025"
+        }
+
+        return (
+            checklist.car.brand.toLowerCase().includes(search.toLowerCase()) ||
+            checklist.car.model.toLowerCase().includes(search.toLowerCase()) ||
+            String(checklist.car.year).includes(search) ||
+            String(checklist.car.priority.description).toLowerCase().includes(search.toLowerCase()) ||
+            String(checklist.car.customer?.toLowerCase()).includes(search.toLowerCase()) ||
+            String(deliveryDate).includes(search)
+        );
+    });
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Checklists" />
@@ -63,8 +87,18 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                     <Button className="text-md cursor-pointer bg-green-600 font-bold shadow-lg hover:bg-green-700">Adicionar checklist</Button>
                 </Link>
             </div>
+            <div className="m-4 flex w-1/2 items-center gap-2">
+                <Search />
+                <Input
+                    placeholder="Pesquise por modelo, marca, ano, prioridade..."
+                    className=""
+                    onChange={(e) => {
+                        setSearch(e.target.value);
+                    }}
+                ></Input>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
-                {checklists.map((checklist, index) => {
+                {filteredCarChecklist.map((checklist, index) => {
                     const car = checklist.car;
 
                     const priorityColors: Record<number, string> = {
@@ -81,7 +115,7 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                             <CardHeader>
                                 <div className="flex flex-col gap-2">
                                     <h1 className="flex gap-2 font-semibold text-card-foreground">
-                                        <Car color="darkblue" /> {car?.brand} {car?.model} {car?.year}
+                                        <Car className="gray dark:text-white" /> {car?.brand} {car?.model} {car?.year}
                                     </h1>
                                     <div
                                         className={`${car ? priorityColors[car.id_priority] : ''} mb-4 w-16 rounded-sm px-2 py-1 text-center text-sm font-bold`}

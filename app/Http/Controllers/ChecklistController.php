@@ -21,7 +21,7 @@ class ChecklistController extends Controller
     public function create()
     {
         $categories = Category::all();
-        $cars = Car::where('status', 1)->whereDoesntHave('checklists')->get();
+        $cars = Car::where('active', 1)->whereDoesntHave('checklists')->get();
         $priorities = Priority::where('status', 1)->get();
 
         return inertia('Checklist/Create')->with([
@@ -48,7 +48,7 @@ class ChecklistController extends Controller
     public function edit(Checklist $checklist)
     {
         $categories = Category::all();
-        $cars = Car::where('status', 1)->get();
+        $cars = Car::where('active', 1)->get();
         $tasks = Task::where('status', 1)->get();
         $priorities = Priority::where('status', 1)->get();
 

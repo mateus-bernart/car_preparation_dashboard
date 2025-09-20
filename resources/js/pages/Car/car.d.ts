@@ -12,4 +12,5 @@ export type Car = {
     year: number;
     created_at: string;
     status: string;
+    active: number;
 };

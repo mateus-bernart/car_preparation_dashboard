@@ -14,6 +14,7 @@ class Car extends Model
     'customer',
     'delivery_date',
     'status',
+    'active',
   ];
 
   public function checklists()

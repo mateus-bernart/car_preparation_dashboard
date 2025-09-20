@@ -13,7 +13,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger("id_priority")->nullable();
             $table->foreign("id_priority")->references("id")->on('priorities')->onDelete('set null');
-            $table->integer("status")->default(1);
+            $table->integer("status")->nullable();
+            $table->integer("active")->default(1);
             $table->string("brand");
             $table->string("model");
             $table->integer("year")->nullable();

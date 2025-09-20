@@ -3,6 +3,7 @@
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -20,7 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/cars/{car}', [CarController::class, 'show'])->name('cars.show');
     Route::post('/cars', [CarController::class, 'store'])->name('cars.store');
     Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('cars.destroy');
-    Route::put('/cars/{car}/toggle-status', [CarController::class, 'toggleStatus'])->name('cars.toggleStatus');
+    Route::put('/cars/{car}/toggle-active', [CarController::class, 'toggleActive'])->name('cars.toggleActive');
 
     // ============ Checklists ============
     Route::get('/checklists', [ChecklistController::class, 'index'])->name('checklists.index');
@@ -32,6 +33,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ============= Tasks ================
     Route::post('/tasks/{task}', [TaskController::class, 'checkTask'])->name('check');
+
+    // ============= Tasks ================
+    Route::get('/delivery', [DeliveryController::class, 'index'])->name('index');
 });
 
 require __DIR__ . '/settings.php';

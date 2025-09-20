@@ -52,7 +52,7 @@ export default function Cars() {
     };
 
     const handleUpdateStatus = (id: number) => {
-        put(`/cars/${id}/toggle-status`, {
+        put(`/cars/${id}/toggle-active`, {
             onSuccess: () => {
                 toast.success('Status do carro atualizado com sucesso!');
             },
@@ -77,15 +77,15 @@ export default function Cars() {
             header: 'Status',
             cell: ({ row }) => {
                 const car = row.original;
-                const statusOption = car.status.toString() === '1' ? 'ativo' : 'inativo';
-                const statusText = car.status.toString() === '1' ? 'inativo' : 'ativo';
+                const statusOption = car.active.toString() === '1' ? 'ativo' : 'inativo';
+                const statusText = car.active.toString() === '1' ? 'inativo' : 'ativo';
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className={car.status.toString() === '1' ? 'bg-green-100 hover:bg-green-200' : 'bg-red-100 hover:bg-red-200'}
+                                className={car.active.toString() === '1' ? 'bg-green-100 hover:bg-green-200' : 'bg-red-100 hover:bg-red-200'}
                             >
                                 {statusOption}
                                 <ChevronDown />
