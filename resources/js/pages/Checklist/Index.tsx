@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { format, parseISO } from 'date-fns';
 import { CalendarCheck, Car, Clock, Edit, Trash, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -62,10 +63,8 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                     <Button className="text-md cursor-pointer bg-green-600 font-bold shadow-lg hover:bg-green-700">Adicionar checklist</Button>
                 </Link>
             </div>
-            <div className="flex flex-col flex-wrap sm:flex-row">
+            <div className="grid gap-4 sm:grid-cols-2">
                 {checklists.map((checklist, index) => {
-                    console.log('checklist: ', checklist);
-                    
                     const car = checklist.car;
 
                     const priorityColors: Record<number, string> = {
@@ -78,7 +77,7 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                     const totalTasks = checklist.tasks.length;
 
                     return (
-                        <Card key={index} className="relative m-2 flex-1 transition-all hover:shadow-lg sm:max-w-[50%]">
+                        <Card key={index} className="relative m-2 transition-all hover:shadow-lg">
                             <CardHeader>
                                 <div className="flex flex-col gap-2">
                                     <h1 className="flex gap-2 font-semibold text-card-foreground">
@@ -94,12 +93,12 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                             <CardContent>
                                 <div className="mb-5 space-y-2">
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Progress</span>
+                                        <span className="text-muted-foreground">Progresso</span>
                                         <span className="font-medium text-card-foreground">{checklist.progress}%</span>
                                     </div>
                                     <Progress value={checklist?.progress} className="h-2" />
                                     <div className="text-xs text-muted-foreground">
-                                        {completedTasks} of {totalTasks} tasks completed
+                                        {completedTasks} de {totalTasks} tarefas concluídas
                                     </div>
                                 </div>
 
@@ -117,9 +116,11 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                         <div className="flex gap-2">
                                             <div className="flex items-center gap-2">
                                                 <CalendarCheck className="h-4 w-4 text-muted-foreground" />
-                                                <span className="text-muted-foreground">Delivery:</span>
+                                                <span className="text-muted-foreground">Entrega:</span>
                                             </div>
-                                            <span className="font-medium text-card-foreground">{car?.delivery_date}</span>
+                                            <span className="font-medium text-card-foreground">
+                                                {car?.delivery_date ? format(parseISO(car.delivery_date), 'dd/MM/yyyy') : '-'}
+                                            </span>
                                         </div>
                                     )}
                                 </div>
@@ -127,7 +128,7 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                 <div className="flex flex-col gap-2">
                                     <Label className="flex gap-2 text-muted-foreground">
                                         <Clock size={15} />
-                                        Task Checklist
+                                        Lista de tarefas
                                     </Label>
                                     <div className="max-h-52 space-y-2 overflow-y-auto">
                                         {checklist.tasks.map((task) => {
@@ -149,21 +150,22 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                                                 {task.description}
                                                             </h1>
                                                         </div>
-
-                                                        <Badge variant="outline" className="text-xs">
-                                                            {task.category.description}
-                                                        </Badge>
+                                                        {task.category?.description && (
+                                                            <Badge variant="outline" className="text-xs">
+                                                                {task.category?.description}
+                                                            </Badge>
+                                                        )}
                                                     </div>
                                                 </div>
                                             );
                                         })}
                                     </div>
-
-                                    <div className="absolute top-[-1rem] right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800 sm:top-2">
-                                        <Link href={`/checklists/${checklist.id}/edit`}>
+                                    <Link href={`/checklists/${checklist.id}/edit`}>
+                                        <div className="absolute top-[-1rem] right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800 sm:top-2">
                                             <Edit color="white" size={20}></Edit>
-                                        </Link>
-                                    </div>
+                                        </div>
+                                    </Link>
+
                                     <Dialog>
                                         <DialogTrigger>
                                             <div className="absolute top-[-1rem] right-2 cursor-pointer rounded-sm bg-red-600 p-2 shadow-lg transition-all hover:bg-red-800 sm:top-2">

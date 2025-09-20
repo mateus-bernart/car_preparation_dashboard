@@ -9,6 +9,7 @@ class Checklist extends Model
   protected $fillable = [
     "id_car",
     "id_user",
+    'include_default_tasks',
     "status",
     "progress",
   ];

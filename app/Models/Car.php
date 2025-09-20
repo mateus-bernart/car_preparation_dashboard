@@ -16,7 +16,7 @@ class Car extends Model
     'status',
   ];
 
-  public function checklist()
+  public function checklists()
   {
     return $this->hasMany(Checklist::class, 'id_car', 'id');
   }

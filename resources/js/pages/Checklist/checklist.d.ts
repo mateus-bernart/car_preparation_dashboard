@@ -6,6 +6,8 @@ type Checklist = {
     tasks: Task[];
     progress: number;
     id: number;
+    id_car: number;
+    include_default_tasks: boolean;
     id_user: number;
     status: string;
 };

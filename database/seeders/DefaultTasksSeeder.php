@@ -16,22 +16,18 @@ class DefaultTasksSeeder extends Seeder
         DB::table('default_tasks')->insert([
             'id_category' => 1,
             'description' => 'Mecânica',
-            'status' => 0,
         ]);
         DB::table('default_tasks')->insert([
             'id_category' => 2,
             'description' => 'Eletrônica',
-            'status' => 0,
         ]);
         DB::table('default_tasks')->insert([
             'id_category' => 3,
             'description' => 'Limpeza',
-            'status' => 0,
         ]);
         DB::table('default_tasks')->insert([
             'id_category' => 4,
             'description' => 'Pintura',
-            'status' => 0,
         ]);
     }
 }

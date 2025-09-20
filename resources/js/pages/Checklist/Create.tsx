@@ -10,12 +10,14 @@ import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { CalendarCheck, ChevronDownIcon, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { Car } from '../Car/car';
 import { Category } from './category';
+import { Checklist } from './checklist';
 import { Priority } from './priority';
+import { Task } from './task';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -38,32 +40,38 @@ type ChecklistForm = {
     customer: string;
     include_default_tasks: boolean;
     tasks: { id: number; task: string; id_category: string }[];
+    delivery_date: string | null;
 };
 
 export default function Checklists({
     categories,
     cars,
     priorities,
-    // checklist,
+    checklist,
+    tasks,
 }: {
     categories: Category[];
     cars: Car[];
     priorities: Priority[];
-    // checklist: Checklist;
+    checklist: Checklist;
+    tasks: Task[];
 }) {
-    const [taskFields, setTaskFields] = useState<{ id: number; task: string; id_category: string }[]>([{ id: 0, task: '', id_category: '' }]);
-    const [selectedCar, setSelectedCar] = useState('');
-    const [priority, setPriority] = useState('');
-    const [customer, setCustomer] = useState('');
-    const [deliveryDate, setDeliveryDate] = useState<Date>();
-    const [defaultTask, setDefaultTask] = useState<boolean>(false);
+    const [taskFields, setTaskFields] = useState<{ id: number; task: string; id_category: string; is_default_task: number }[]>(
+        tasks && tasks.length > 0
+            ? tasks.map((t) => ({ id: t.id, task: t.description, id_category: t.id_category?.toString(), is_default_task: t.is_default_task }))
+            : [{ id: 0, task: '', id_category: '', is_default_task: 0 }],
+    );
 
-    const { data, errors, setError } = useForm<ChecklistForm>({
-        id_priority: '',
-        customer: '',
-        id_car: '',
-        include_default_tasks: false,
-        tasks: [{ id: 0, task: '', id_category: '' }],
+    const { data, errors, setError, setData } = useForm<ChecklistForm>({
+        id_priority: checklist?.car?.id_priority.toString() || '',
+        customer: checklist?.car.customer?.toString() || '',
+        id_car: checklist?.id_car.toString() || '',
+        include_default_tasks: checklist?.include_default_tasks || false,
+        tasks:
+            tasks && tasks.length > 0
+                ? tasks.map((t) => ({ id: t.id, task: t.description, id_category: t.id_category?.toString(), is_default_task: t.is_default_task }))
+                : [{ id: 0, task: '', id_category: '' }],
+        delivery_date: checklist?.car?.delivery_date || null,
     });
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -72,23 +80,27 @@ export default function Checklists({
         const payload = {
             ...data,
             tasks: taskFields,
-            id_car: selectedCar,
-            id_priority: priority,
-            include_default_tasks: defaultTask,
-            customer: customer,
-            delivery_date: deliveryDate ? format(deliveryDate, 'yyyy-MM-dd') : null,
         };
 
-        router.post('/checklists', payload, {
-            onError: (errors) => {
-                setError(errors);
-                console.error('Falha na validação:', errors);
-            },
-        });
+        if (checklist) {
+            router.post(`/checklists/${checklist.id}/edit`, payload, {
+                onError: (errors) => {
+                    setError(errors);
+                    console.error('Falha na validação:', errors);
+                },
+            });
+        } else {
+            router.post('/checklists', payload, {
+                onError: (errors) => {
+                    setError(errors);
+                    console.error('Falha na validação:', errors);
+                },
+            });
+        }
     };
 
     const handleAddTask = () => {
-        setTaskFields((prev) => [...prev, { id: Date.now(), task: '', id_category: '' }]);
+        setTaskFields((prev) => [...prev, { id: Date.now(), task: '', id_category: '', is_default_task: 0 }]);
     };
 
     const handleRemoveTask = (index: number) => {
@@ -117,17 +129,18 @@ export default function Checklists({
                                         </Label>
 
                                         <Select
+                                            value={data.id_car}
                                             onValueChange={(value) => {
                                                 setError('id_car', '');
-                                                return setSelectedCar(value);
+                                                setData('id_car', value);
                                             }}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Selecione" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {cars.map((car) => (
-                                                    <SelectItem value={car.id.toString()} key={car.id}>
+                                                {cars.map((car, index) => (
+                                                    <SelectItem value={car.id.toString()} key={index}>
                                                         {car.brand} - {car.model} - {car.year}
                                                     </SelectItem>
                                                 ))}
@@ -142,17 +155,18 @@ export default function Checklists({
                                         </Label>
 
                                         <Select
+                                            value={data.id_priority}
                                             onValueChange={(value) => {
                                                 setError('id_priority', '');
-                                                return setPriority(value);
+                                                setData('id_priority', value);
                                             }}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Selecione" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {priorities.map((p) => (
-                                                    <SelectItem key={p.id} value={p.id.toString()}>
+                                                {priorities.map((p, index) => (
+                                                    <SelectItem key={index} value={p.id.toString()}>
                                                         {p.description}
                                                     </SelectItem>
                                                 ))}
@@ -162,7 +176,10 @@ export default function Checklists({
                                     </div>
                                     <div className="flex flex-1 flex-col gap-2">
                                         <Label>Incluir tarefas padrão?</Label>
-                                        <Switch checked={defaultTask} onCheckedChange={(val) => setDefaultTask(val)} />
+                                        <Switch
+                                            checked={data.include_default_tasks}
+                                            onCheckedChange={(value) => setData('include_default_tasks', value)}
+                                        />
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
@@ -170,11 +187,11 @@ export default function Checklists({
                                         <Label>Cliente</Label>
 
                                         <Input
-                                            value={customer}
+                                            value={data.customer}
                                             placeholder={`Informe`}
                                             onChange={(e) => {
                                                 setError('customer', '');
-                                                return setCustomer(e.target.value);
+                                                setData('customer', e.target.value);
                                             }}
                                         ></Input>
                                     </div>
@@ -185,7 +202,7 @@ export default function Checklists({
                                                 <Button variant="outline" id="date-picker" className="justify-between font-normal">
                                                     <div className="flex gap-2">
                                                         <CalendarCheck color="gray" />
-                                                        {deliveryDate ? deliveryDate.toLocaleDateString() : 'Selecione'}
+                                                        {data?.delivery_date ?? 'Selecione'}
                                                     </div>
                                                     <ChevronDownIcon />
                                                 </Button>
@@ -193,10 +210,10 @@ export default function Checklists({
                                             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
                                                 <Calendar
                                                     mode="single"
-                                                    selected={deliveryDate}
+                                                    selected={data.delivery_date ? parseISO(data.delivery_date) : undefined}
                                                     captionLayout="dropdown"
                                                     onSelect={(date) => {
-                                                        setDeliveryDate(date);
+                                                        setData('delivery_date', date ? format(date, 'yyyy-MM-dd') : null);
                                                     }}
                                                 />
                                             </PopoverContent>
@@ -207,71 +224,78 @@ export default function Checklists({
                                 <div className="flex flex-col gap-2 rounded-md bg-muted p-5 shadow-md">
                                     <Label>Tarefas adicionais</Label>
 
-                                    {taskFields.map((task, index) => (
-                                        <div key={index}>
-                                            <div className="flex gap-2">
-                                                <div className="flex w-full flex-row gap-2">
-                                                    <Input
-                                                        value={task.task}
-                                                        placeholder={`Tarefa ${index + 1}`}
-                                                        onChange={(e) => handleUpdateTaskFields(index, e.target.value, 'task')}
-                                                    ></Input>
-                                                    <div className="flex flex-col gap-2">
-                                                        <Select
-                                                            onValueChange={(value) => {
-                                                                handleUpdateTaskFields(index, value, 'id_category');
-                                                                setError(`tasks.${index}.id_category`, '');
-                                                            }}
-                                                        >
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Categoria" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {categories.map((category) => (
-                                                                    <SelectItem
-                                                                        key={category.id}
-                                                                        value={category.id.toString()}
-                                                                        className="font-bold"
-                                                                    >
-                                                                        {category.description}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                    {taskFields.map((task, index) => {
+                                        return (
+                                            <div key={task.id}>
+                                                <div className="flex gap-2">
+                                                    <div className="flex w-full flex-row gap-2">
+                                                        <Input
+                                                            value={task.task}
+                                                            placeholder={`Tarefa ${index + 1}`}
+                                                            onChange={(e) => handleUpdateTaskFields(index, e.target.value, 'task')}
+                                                        ></Input>
+                                                        <div className="flex flex-col gap-2">
+                                                            <Select
+                                                                value={task.id_category}
+                                                                onValueChange={(value) => {
+                                                                    handleUpdateTaskFields(index, value, 'id_category');
+                                                                    setError(`tasks.${index}.id_category`, '');
+                                                                }}
+                                                            >
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Categoria" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {categories.map((category) => (
+                                                                        <SelectItem
+                                                                            key={category.id}
+                                                                            value={category.id.toString()}
+                                                                            className="font-bold"
+                                                                        >
+                                                                            {category.description}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                {index === taskFields.length - 1 ? (
-                                                    <Button
-                                                        className="bg-green-700 hover:cursor-pointer hover:bg-green-800 hover:shadow-md"
-                                                        variant={'outline'}
-                                                        type="button"
-                                                        onClick={handleAddTask}
-                                                    >
-                                                        <Plus color="white" />
-                                                    </Button>
-                                                ) : (
-                                                    <Button
-                                                        className="bg-red-700 hover:cursor-pointer hover:bg-red-800 hover:shadow-md"
-                                                        variant={'outline'}
-                                                        type="button"
-                                                        onClick={() => handleRemoveTask(task.id)}
-                                                    >
-                                                        <X color="white" />
-                                                    </Button>
-                                                )}
+                                                    {index === taskFields.length - 1 ? (
+                                                        <Button
+                                                            className="bg-green-700 hover:cursor-pointer hover:bg-green-800 hover:shadow-md"
+                                                            type="button"
+                                                            onClick={handleAddTask}
+                                                        >
+                                                            <Plus color="white" />
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            className="bg-red-700 hover:cursor-pointer hover:bg-red-800 hover:shadow-md"
+                                                            type="button"
+                                                            onClick={() => handleRemoveTask(task.id)}
+                                                        >
+                                                            <X color="white" />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                                <InputError message={errors[`tasks.${index}.task`]} />
+                                                <InputError message={errors[`tasks.${index}.id_category`]} />
                                             </div>
-                                            <InputError message={errors[`tasks.${index}.task`]} />
-                                            <InputError message={errors[`tasks.${index}.id_category`]} />
-                                            <InputError message={errors[`tasks`]} />
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
+                                    <InputError message={errors[`tasks`]} />
                                 </div>
                             </div>
                         </div>
-                        <Button type="submit" className="mt-4">
-                            Salvar checklist
-                        </Button>
+                        {checklist ? (
+                            <Button type="submit" className="mt-4">
+                                Salvar checklist
+                            </Button>
+                        ) : (
+                            <Button type="submit" className="mt-4">
+                                Salvar alterações
+                            </Button>
+                        )}
                     </form>
                 </CardContent>
             </Card>
