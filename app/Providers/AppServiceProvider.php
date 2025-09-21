@@ -20,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Inertia::version(fn() => null); // força refresh sempre
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }
