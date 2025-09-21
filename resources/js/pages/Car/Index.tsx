@@ -18,7 +18,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { BadgeCheckIcon, ChevronDown, ListRestart, Trash, Truck, Undo } from 'lucide-react';
+import { BadgeCheckIcon, ChevronDown, Edit, ListRestart, Trash, Truck, Undo } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 import { Car } from './car';
@@ -41,7 +41,7 @@ type PageProps = {
 
 export default function Cars() {
     const { props } = usePage<PageProps>();
-    const { delete: destroy, processing, put, post } = useForm();
+    const { delete: destroy, processing, put, post, get } = useForm();
 
     useEffect(() => {
         if (props.success) {
@@ -53,8 +53,9 @@ export default function Cars() {
         destroy(`/cars/${id}`);
     };
 
-    const handleUpdateStatus = (id: number) => {
+    const handleUpdateActive = (id: number) => {
         put(`/cars/${id}/toggle-active`, {
+            preserveScroll: true,
             onSuccess: () => {
                 toast.success('Status do carro atualizado com sucesso!');
             },
@@ -64,7 +65,18 @@ export default function Cars() {
     const columns: ColumnDef<Car>[] = [
         {
             accessorKey: 'brand',
-            header: 'Marca',
+            header: () => <div className="ml-9">Marca</div>,
+            cell: ({ row }) => {
+                const car = row.original;
+                return (
+                    <div className="flex items-center">
+                        <Button variant={'ghost'} size="icon" onClick={() => get(`/cars/${car.id}`)}>
+                            <Edit></Edit>
+                        </Button>
+                        <p className="flex justify-center">{car.brand}</p>
+                    </div>
+                );
+            },
         },
         {
             accessorKey: 'model',
@@ -111,7 +123,7 @@ export default function Cars() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => handleUpdateStatus(car.id)}>{statusText}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleUpdateActive(car.id)}>{statusText}</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );

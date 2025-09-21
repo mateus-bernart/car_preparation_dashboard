@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
+import { Car } from './car';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,19 +23,26 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Create() {
+export default function Create({ car }: { car: Car }) {
     const { data, setData, post, errors } = useForm({
-        brand: '',
-        model: '',
-        year: '',
-        plate_number: '',
-        kilometers: '',
-        color: '',
+        brand: car?.brand || '',
+        model: car?.model || '',
+        year: car?.year || '',
+        plate_number: car?.plate_number || '',
+        kilometers: car?.kilometers || '',
+        color: car?.color || '',
     });
+
+    console.log('car: ', car);
 
     function handleSubmit(event: React.FormEvent) {
         event.preventDefault();
-        post('/cars');
+
+        if (car) {
+            post(`/cars/${car.id}`);
+        } else {
+            post('/cars');
+        }
     }
 
     return (
@@ -83,7 +91,7 @@ export default function Create() {
                                 />
                                 <InputError message={errors.kilometers}></InputError>
                             </div>
-                                <div className="mb-4 flex flex-col gap-1">
+                            <div className="mb-4 flex flex-col gap-1">
                                 <Label>Cor</Label>
                                 <Input
                                     placeholder="Informe"
@@ -93,7 +101,7 @@ export default function Create() {
                                 <InputError message={errors.color}></InputError>
                             </div>
                         </div>
-                        
+
                         <Button type="submit" className="mt-4">
                             Salvar carro
                         </Button>

@@ -10,6 +10,7 @@ export type Car = {
     brand: string;
     model: string;
     year: number;
+    color: number;
     plate_number: number;
     kilometers: number;
     created_at: string;

@@ -53,6 +53,7 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
+    autoResetPageIndex: false,
     filterFns: {
       fuzzy: (row, _, value) => {
         const data = row.original
