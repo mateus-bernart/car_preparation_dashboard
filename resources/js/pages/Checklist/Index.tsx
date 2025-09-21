@@ -10,10 +10,10 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
-import { CalendarCheck, Car, Clock, Edit, Search, Trash, User } from 'lucide-react';
+import { CalendarCheck, Car, Check, Clock, Edit, Search, Trash, Truck, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Checklist, ChecklistFormData } from './checklist';
+import { Checklist, ChecklistFormData } from './types/checklist';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -57,8 +57,6 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
         destroy(`/checklists/${id}`);
     };
 
-    console.log('checklist: ', checklists);
-
     const filteredCarChecklist = checklists.filter((checklist) => {
         const car = checklist.car;
 
@@ -78,6 +76,8 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
             String(deliveryDate).includes(search)
         );
     });
+
+    const readyForDeliver = checklists.find((c) => c.progress === 100);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -118,14 +118,28 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                         <Car className="gray dark:text-white" /> {car?.brand} {car?.model} {car?.year}
                                     </h1>
                                     <div
-                                        className={`${car ? priorityColors[car.id_priority] : ''} mb-4 w-16 rounded-sm px-2 py-1 text-center text-sm font-bold`}
+                                        className={`${car ? priorityColors[car.id_priority] : ''} w-16 rounded-sm px-2 py-1 text-center text-sm font-bold`}
                                     >
                                         <span>{car?.priority.description}</span>
                                     </div>
                                 </div>
                             </CardHeader>
+
                             <CardContent>
-                                <div className="mb-5 space-y-2">
+                                <div className="relative space-y-2">
+                                    <div className="absolute top-[-40px] right-0 flex justify-end">
+                                        <Button
+                                            variant={'outline'}
+                                            style={{ border: 'none' }}
+                                            className={`cursor-pointer bg-green-500 hover:bg-green-600 ${
+                                                readyForDeliver ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+                                            }`}
+                                            onClick={() => post(`/cars/${car.id}/${3}`)}
+                                        >
+                                            <Check />
+                                            <Truck />
+                                        </Button>
+                                    </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Progresso</span>
                                         <span className="font-medium text-card-foreground">{checklist.progress}%</span>

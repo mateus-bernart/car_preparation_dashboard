@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/cars/{car}', [CarController::class, 'show'])->name('cars.show');
     Route::post('/cars', [CarController::class, 'store'])->name('cars.store');
     Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('cars.destroy');
+    Route::post('/cars/{car}/{status}', [CarController::class, 'changeStatus'])->name('cars.changeStatus');
     Route::put('/cars/{car}/toggle-active', [CarController::class, 'toggleActive'])->name('cars.toggleActive');
 
     // ============ Checklists ============
@@ -33,9 +34,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ============= Tasks ================
     Route::post('/tasks/{task}', [TaskController::class, 'checkTask'])->name('check');
-
-    // ============= Tasks ================
-    Route::get('/delivery', [DeliveryController::class, 'index'])->name('index');
 });
 
 require __DIR__ . '/settings.php';

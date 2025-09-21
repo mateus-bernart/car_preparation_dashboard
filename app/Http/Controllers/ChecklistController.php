@@ -14,14 +14,18 @@ class ChecklistController extends Controller
 {
     public function index()
     {
-        $checklists = Checklist::with(['car.priority', 'tasks.category'])->get();
+        $checklists = Checklist::with(['car.priority', 'tasks.category'])
+            ->whereHas('car', function ($query) {
+                $query->where('status', 2);
+            })->get();
         return inertia('Checklist/Index')->with(['checklists' => $checklists]);
     }
 
     public function create()
     {
         $categories = Category::all();
-        $cars = Car::where('active', 1)->whereDoesntHave('checklists')->get();
+        $cars = Car::where('active', 1)->where('status', 1)->whereDoesntHave('checklists')->get();
+        //redundant wheredoesnthave cecklists if status = 1 "in preparation"?
         $priorities = Priority::where('status', 1)->get();
 
         return inertia('Checklist/Create')->with([
@@ -67,6 +71,7 @@ class ChecklistController extends Controller
     public function destroy(Checklist $checklist)
     {
         $checklist->delete();
+        $checklist->car->status = 1;
         return redirect()->route('checklists.index')->with('success', 'Checklist removido com sucesso!');
     }
 }

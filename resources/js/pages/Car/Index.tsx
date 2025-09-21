@@ -9,15 +9,17 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { ChevronDown, Trash } from 'lucide-react';
-import { useEffect } from 'react';
+import { BadgeCheckIcon, Check, ChevronDown, ListRestart, Trash, Truck, Undo } from 'lucide-react';
+import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 import { Car } from './car';
 
@@ -39,7 +41,7 @@ type PageProps = {
 
 export default function Cars() {
     const { props } = usePage<PageProps>();
-    const { delete: destroy, processing, put } = useForm();
+    const { delete: destroy, processing, put, post } = useForm();
 
     useEffect(() => {
         if (props.success) {
@@ -73,8 +75,8 @@ export default function Cars() {
             header: 'Ano',
         },
         {
-            accessorKey: 'status',
-            header: 'Status',
+            accessorKey: 'active',
+            header: 'Ativo / Inativo',
             cell: ({ row }) => {
                 const car = row.original;
                 const statusOption = car.active.toString() === '1' ? 'ativo' : 'inativo';
@@ -86,6 +88,7 @@ export default function Cars() {
                                 variant="outline"
                                 size="sm"
                                 className={car.active.toString() === '1' ? 'bg-green-100 hover:bg-green-200' : 'bg-red-100 hover:bg-red-200'}
+                                style={{ border: 'none' }}
                             >
                                 {statusOption}
                                 <ChevronDown />
@@ -99,31 +102,158 @@ export default function Cars() {
             },
         },
         {
+            accessorKey: 'status',
+            header: 'Status',
+            cell: ({ row }) => {
+                let statusText = '';
+                let variant: 'default' | 'destructive' | 'outline' | 'secondary' | null | undefined;
+                let className = '';
+                let textColor = '';
+                let iconElement: React.ReactNode = null;
+                switch (row.original.status?.toString()) {
+                    case '2':
+                        statusText = 'Em preparação';
+                        variant = 'outline';
+                        className = 'bg-amber-300';
+                        break;
+                    case '3':
+                        statusText = 'Pronto para entrega';
+                        variant = 'outline';
+                        iconElement = <Truck />;
+                        className = 'bg-green-300';
+                        break;
+                    case '4':
+                        statusText = 'Entregue';
+                        variant = 'outline';
+                        iconElement = <BadgeCheckIcon />;
+                        className = 'bg-blue-500';
+                        textColor = 'white';
+                        break;
+                    default:
+                        statusText = 'Disponível';
+                        variant = 'outline';
+                        break;
+                }
+
+                return (
+                    <Badge variant={variant} style={{ border: 'none' }} className={`p-2 ${className} text-${textColor} font-black`}>
+                        {iconElement}
+                        {statusText}
+                    </Badge>
+                );
+            },
+        },
+        {
             id: 'actions',
             header: 'Ações',
             cell: ({ row }) => {
                 const car = row.original;
 
+                type CarAction = {
+                    label: string;
+                    description: (car: Car) => string;
+                    onConfirm: (car: Car) => void;
+                    buttonClass: string;
+                    icon: React.ReactNode;
+                    tooltip: string;
+                };
+
+                const statusActions: Record<string, CarAction[]> = {
+                    '1': [
+                        //Disponível
+                    ],
+                    '2': [
+                        // Em preparação
+                        {
+                            label: 'Entregue',
+                            description: (car) => `Marcar ${car.brand} - ${car.model} ${car.year} como pronto para entrega?`,
+                            onConfirm: (car) => post(`/cars/${car.id}/3`),
+                            buttonClass: 'bg-green-500 hover:bg-green-600',
+                            icon: <Check />,
+                            tooltip: 'pronto para entrega',
+                        },
+                    ],
+                    '3': [
+                        // Pronto para entrega
+                        {
+                            label: 'Em preparação',
+                            description: (car) => `Marcar ${car.brand} - ${car.model} ${car.year} para "Em preparação"?`,
+                            onConfirm: (car) => post(`/cars/${car.id}/2`),
+                            buttonClass: 'bg-amber-200 hover:bg-amber-300',
+                            icon: <ListRestart />,
+                            tooltip: 'em preparação',
+                        },
+                        {
+                            label: 'Entregue',
+                            description: (car) => `Marcar ${car.brand} - ${car.model} ${car.year} como entregue?`,
+                            onConfirm: (car) => post(`/cars/${car.id}/4`),
+                            buttonClass: 'bg-green-500 hover:bg-green-600',
+                            icon: <Truck />,
+                            tooltip: 'entregue',
+                        },
+                    ],
+                    '4': [
+                        // Entregue
+                        {
+                            label: 'Entregue',
+                            description: (car) => `Marcar ${car.brand} - ${car.model} ${car.year} como pronto para entrega?`,
+                            onConfirm: (car) => post(`/cars/${car.id}/3`),
+                            buttonClass: 'bg-amber-200 hover:bg-amber-300',
+                            icon: <Undo />,
+                            tooltip: 'pronto para entrega',
+                        },
+                    ],
+                };
+
                 return (
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="hover:bg-red-700" size="icon" disabled={processing}>
-                                <Trash />
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Remover o {car.brand} - {car.model} {car.year}.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteCar(car.id)}>Excluir</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    <div className="flex gap-2">
+                        {(statusActions[car.status?.toString()] || []).map((action) => (
+                            <AlertDialog key={action.label}>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" className={action.buttonClass} size="icon" disabled={processing}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <span>{action.icon}</span>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>{action.tooltip}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                                        <AlertDialogDescription>{action.description(car)}</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => action.onConfirm(car)}>Sim</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        ))}
+
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" className="hover:bg-red-700" size="icon" disabled={processing}>
+                                    <Trash />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Remover o {car.brand} - {car.model} {car.year}.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteCar(car.id)}>Excluir</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 );
             },
         },
@@ -139,7 +269,7 @@ export default function Cars() {
                 </Link>
             </div>
             <div className="m-4">
-                <DataTable columns={columns} data={props.cars} searchFields={['brand', 'model', 'year', 'status']}></DataTable>
+                <DataTable columns={columns} data={props.cars} searchFields={['brand', 'model', 'year', 'status', 'active']}></DataTable>
             </div>
         </AppLayout>
     );

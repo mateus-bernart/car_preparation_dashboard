@@ -14,10 +14,10 @@ import { format, parseISO } from 'date-fns';
 import { CalendarCheck, ChevronDownIcon, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { Car } from '../Car/car';
-import { Category } from './category';
-import { Checklist } from './checklist';
-import { Priority } from './priority';
-import { Task } from './task';
+import { Category } from './types/category';
+import { Priority } from './types/priority';
+import { Checklist } from './types/checklist';
+import { Task } from './types/task';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

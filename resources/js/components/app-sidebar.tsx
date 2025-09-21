@@ -4,7 +4,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes/index';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { CalendarCheck, Car, Check, LayoutGrid } from 'lucide-react';
+import { Car, Check, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -22,11 +22,6 @@ const mainNavItems: NavItem[] = [
         title: 'Checklists',
         href: '/checklists',
         icon: Check,
-    },
-    {
-        title: 'Prontos para entrega',
-        href: '/delivery',
-        icon: CalendarCheck,
     },
 ];
 

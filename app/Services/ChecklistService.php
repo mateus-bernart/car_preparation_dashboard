@@ -58,6 +58,7 @@ class ChecklistService
       'id_priority' => $validated['id_priority'],
       'delivery_date' => $validated['delivery_date'],
       'customer' => $validated['customer'],
+      'status' => 2,
     ]);
 
     return $checklist;

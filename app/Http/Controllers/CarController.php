@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Car;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CarController extends Controller
 {
@@ -50,5 +51,28 @@ class CarController extends Controller
         $car->active === 1 ? $car->active = 2 : $car->active = 1;
         $car->save();
         return redirect()->route('cars.index');
+    }
+
+    public function changeStatus(Car $car, $status)
+    {
+        $car->status = $status;
+        $car->save();
+
+        $message = '';
+        switch ($status) {
+            case '2':
+                $message = "em preparação";
+                break;
+            case '3':
+                $message = "pronto para entrega";
+                break;
+            case '4':
+                $message = "entregue";
+                break;
+            default:
+                break;
+        }
+
+        return redirect()->route('cars.index')->with('success', "Carro marcado como {$message}!");
     }
 }
