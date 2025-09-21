@@ -25,24 +25,26 @@ class ChecklistService
         'include_default_tasks' => $validated['include_default_tasks'],
       ]);
 
-      $checklist->tasks()->delete();
+      $checklist->tasks()->where('is_default_task', 0)->delete();
     }
 
-    if ($validated['include_default_tasks']) {
+    if ($validated['include_default_tasks'] && $checklist->include_default_tasks !== 1) {
       foreach (DefaultTask::all() as $task) {
-        Task::create([
-          'id_checklist' => $checklist->id,
-          'id_category' => $task->id_category,
-          'description' => $task->description,
-          'is_default_task' => 1
-        ]);
+        Task::updateOrCreate(
+          [
+            'id_checklist' => $checklist->id,
+            'id_category' => $task->id_category,
+            'is_default_task' => 1
+          ],
+          [
+            'description' => $task->description,
+          ]
+        );
       }
     }
 
-
     if (!empty($validated['tasks'])) {
       foreach ($validated['tasks'] as $task) {
-
         Task::create([
           'id_checklist' => $checklist->id,
           'id_category' => $task['id_category'],
