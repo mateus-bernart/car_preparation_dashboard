@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CarRequest;
 use App\Models\Car;
+use App\Services\CarService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CarController extends Controller
 {
@@ -18,25 +21,28 @@ class CarController extends Controller
         return inertia('Car/Create');
     }
 
-    public function store(Request $request)
+    public function store(CarRequest $request, CarService $service)
     {
-        $validated = $request->validate([
-            'brand' => 'required|string|max:255',
-            'model' => 'required|string|max:255',
-            'year' => 'nullable|integer|min:1886',
-        ], [
-            'brand.required' => 'O campo marca é obrigatório.',
-            'brand.string' => 'O campo marca deve ser uma string.',
-            'brand.max' => 'O campo marca não pode exceder 255 caracteres.',
-            'model.required' => 'O campo modelo é obrigatório.',
-            'model.string' => 'O campo modelo deve ser uma string.',
-            'model.max' => 'O campo modelo não pode exceder 255 caracteres.',
-            'year.integer' => 'O campo ano deve ser um número inteiro.',
-            'year.min' => 'O campo ano deve ser no mínimo 1886.',
-        ]);
-
-        Car::create($validated);
+        $service->save($request->validated());
         return redirect()->route('cars.index')->with('success', 'Carro adicionado com sucesso.');
+    }
+
+    public function update(CarRequest $request, CarService $service, Car $car)
+    {
+        $service->save($request->validated(), $car);
+        return redirect()->route('cars.index')->with('success', 'Carro atualizado com sucesso.');
+    }
+
+    public function edit(Car $car)
+    {
+        return inertia('Car/Create')->with([
+            'car' => $car,
+            'model' => $car->model,
+            'brand' => $car->brand,
+            'year' => $car->year,
+            'plate_number' => $car->plate_number,
+            'kilometers' => $car->kilometers,
+        ]);
     }
 
     public function destroy(Car $car)
@@ -45,10 +51,33 @@ class CarController extends Controller
         return redirect()->route('cars.index')->with('success', "Carro removido com sucesso!");
     }
 
-    public function toggleStatus(Car $car)
+    public function toggleActive(Car $car)
     {
-        $car->status === 1 ? $car->status = 2 : $car->status = 1;
+        $car->active === 1 ? $car->active = 2 : $car->active = 1;
         $car->save();
-        return redirect()->route('cars.index');
+        return back();
+    }
+
+    public function changeStatus(Car $car, $status)
+    {
+        $car->status = $status;
+        $car->save();
+
+        $message = '';
+        switch ($status) {
+            case '2':
+                $message = "em preparação";
+                break;
+            case '3':
+                $message = "pronto para entrega";
+                break;
+            case '4':
+                $message = "entregue";
+                break;
+            default:
+                break;
+        }
+
+        return redirect()->route('cars.index')->with('success', "Carro marcado como {$message}!");
     }
 }

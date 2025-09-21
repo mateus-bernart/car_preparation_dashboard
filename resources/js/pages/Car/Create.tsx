@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
+import { Car } from './car';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,16 +23,26 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Create() {
+export default function Create({ car }: { car: Car }) {
     const { data, setData, post, errors } = useForm({
-        brand: '',
-        model: '',
-        year: '',
+        brand: car?.brand || '',
+        model: car?.model || '',
+        year: car?.year || '',
+        plate_number: car?.plate_number || '',
+        kilometers: car?.kilometers || '',
+        color: car?.color || '',
     });
+
+    console.log('car: ', car);
 
     function handleSubmit(event: React.FormEvent) {
         event.preventDefault();
-        post('/cars');
+
+        if (car) {
+            post(`/cars/${car.id}`);
+        } else {
+            post('/cars');
+        }
     }
 
     return (
@@ -44,18 +55,18 @@ export default function Create() {
                         <div className="flex flex-row gap-2">
                             <div className="mb-4 flex flex-col gap-1">
                                 <Label>Marca</Label>
-                                <Input placeholder="Digite a marca do carro" value={data.brand} onChange={(e) => setData('brand', e.target.value)} />
+                                <Input placeholder="Informe" value={data.brand} onChange={(e) => setData('brand', e.target.value)} />
                                 <InputError message={errors.brand}></InputError>
                             </div>
                             <div className="mb-4 flex flex-col gap-1">
                                 <Label>Modelo</Label>
-                                <Input placeholder="Digite o modelo do carro" value={data.model} onChange={(e) => setData('model', e.target.value)} />
+                                <Input placeholder="Informe" value={data.model} onChange={(e) => setData('model', e.target.value)} />
                                 <InputError message={errors.model}></InputError>
                             </div>
                             <div className="mb-4 flex flex-col gap-1">
                                 <Label>Ano</Label>
                                 <Input
-                                    placeholder="Digite o ano do carro"
+                                    placeholder="Informe"
                                     value={data.year}
                                     onChange={(e) => {
                                         if (e.target.value.length > 4) return;
@@ -65,6 +76,32 @@ export default function Create() {
                                 <InputError message={errors.year}></InputError>
                             </div>
                         </div>
+                        <div className="flex flex-row gap-2">
+                            <div className="mb-4 flex flex-col gap-1">
+                                <Label>Placa</Label>
+                                <Input placeholder="Informe" value={data.plate_number} onChange={(e) => setData('plate_number', e.target.value)} />
+                                <InputError message={errors.plate_number}></InputError>
+                            </div>
+                            <div className="mb-4 flex flex-col gap-1">
+                                <Label>Quilometragem</Label>
+                                <Input
+                                    placeholder="Informe"
+                                    value={data.kilometers}
+                                    onChange={(e) => setData('kilometers', e.target.value.replace(',', '.'))}
+                                />
+                                <InputError message={errors.kilometers}></InputError>
+                            </div>
+                            <div className="mb-4 flex flex-col gap-1">
+                                <Label>Cor</Label>
+                                <Input
+                                    placeholder="Informe"
+                                    value={data.color}
+                                    onChange={(e) => setData('color', e.target.value.replace(',', '.'))}
+                                />
+                                <InputError message={errors.color}></InputError>
+                            </div>
+                        </div>
+
                         <Button type="submit" className="mt-4">
                             Salvar carro
                         </Button>

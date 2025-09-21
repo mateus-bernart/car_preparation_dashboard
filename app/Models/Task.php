@@ -11,6 +11,7 @@ class Task extends Model
     'id_category',
     'description',
     'status',
+    'is_default_task'
   ];
 
   public function category()

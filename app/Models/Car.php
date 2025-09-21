@@ -11,12 +11,16 @@ class Car extends Model
     'brand',
     'model',
     'year',
+    'plate_number',
+    'kilometers',
+    'color',
     'customer',
     'delivery_date',
     'status',
+    'active',
   ];
 
-  public function checklist()
+  public function checklists()
   {
     return $this->hasMany(Checklist::class, 'id_car', 'id');
   }

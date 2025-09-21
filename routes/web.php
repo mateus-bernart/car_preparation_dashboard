@@ -3,6 +3,7 @@
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -17,15 +18,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ============ Cars ============
     Route::get('/cars', [CarController::class, 'index'])->name('cars.index');
     Route::get('/cars/create', [CarController::class, 'create'])->name('cars.create');
-    Route::get('/cars/{car}', [CarController::class, 'show'])->name('cars.show');
     Route::post('/cars', [CarController::class, 'store'])->name('cars.store');
+    Route::get('/cars/{car}', [CarController::class, 'edit'])->name('cars.edit');
+    Route::post('/cars/{car}', [CarController::class, 'update'])->name('cars.update');
     Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('cars.destroy');
-    Route::put('/cars/{car}/toggle-status', [CarController::class, 'toggleStatus'])->name('cars.toggleStatus');
+    Route::post('/cars/{car}/{status}', [CarController::class, 'changeStatus'])->name('cars.changeStatus');
+    Route::put('/cars/{car}/toggle-active', [CarController::class, 'toggleActive'])->name('cars.toggleActive');
 
     // ============ Checklists ============
     Route::get('/checklists', [ChecklistController::class, 'index'])->name('checklists.index');
     Route::get('/checklists/create', [ChecklistController::class, 'create'])->name('checklists.create');
     Route::get('/checklists/{checklist}/edit', [ChecklistController::class, 'edit'])->name('checklists.edit');
+    Route::post('/checklists/{checklist}/edit', [ChecklistController::class, 'update'])->name('checklists.update');
     Route::post('/checklists', [ChecklistController::class, 'store'])->name('checklists.store');
     Route::delete('/checklists/{checklist}', [ChecklistController::class, 'destroy'])->name('checklists.destroy');
 

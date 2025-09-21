@@ -3,15 +3,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { CalendarCheck, Car, Clock, Edit, Trash, User } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { CalendarCheck, Car, Check, Clock, Edit, Search, Trash, Truck, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Checklist, ChecklistFormData } from './checklist';
+import { Checklist, ChecklistFormData } from './types/checklist';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -32,6 +34,7 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
     const { props } = usePage<PageProps>();
 
     const [tasksChecked, setTasksChecked] = useState<number[]>([]);
+    const [search, setSearch] = useState('');
 
     const { delete: destroy, post } = useForm<ChecklistFormData>({
         id: 0,
@@ -54,6 +57,35 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
         destroy(`/checklists/${id}`);
     };
 
+    const filteredCarChecklist = checklists.filter((checklist) => {
+        const car = checklist.car;
+
+        let deliveryDate = '';
+        if (car.delivery_date) {
+            // garante que vem no formato certo
+            const parsed = parseISO(car.delivery_date); // "2025-09-21"
+            deliveryDate = format(parsed, 'dd/MM/yyyy'); // "21/09/2025"
+        }
+
+        return (
+            checklist.car.brand.toLowerCase().includes(search.toLowerCase()) ||
+            checklist.car.model.toLowerCase().includes(search.toLowerCase()) ||
+            String(checklist.car.year).includes(search) ||
+            String(checklist.car.priority.description)
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .includes(
+                    search
+                        .toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, ''),
+                ) ||
+            String(checklist.car.customer?.toLowerCase()).includes(search.toLowerCase()) ||
+            String(deliveryDate).includes(search)
+        );
+    });
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Checklists" />
@@ -62,10 +94,18 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                     <Button className="text-md cursor-pointer bg-green-600 font-bold shadow-lg hover:bg-green-700">Adicionar checklist</Button>
                 </Link>
             </div>
-            <div className="flex flex-col flex-wrap sm:flex-row">
-                {checklists.map((checklist, index) => {
-                    console.log('checklist: ', checklist);
-                    
+            <div className="m-4 flex w-1/2 items-center gap-2">
+                <Search />
+                <Input
+                    placeholder="Pesquise por modelo, marca, ano, prioridade..."
+                    className=""
+                    onChange={(e) => {
+                        setSearch(e.target.value);
+                    }}
+                ></Input>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+                {filteredCarChecklist.map((checklist, index) => {
                     const car = checklist.car;
 
                     const priorityColors: Record<number, string> = {
@@ -77,29 +117,45 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                     const completedTasks = checklist.tasks.filter((t) => t.status === 1).length;
                     const totalTasks = checklist.tasks.length;
 
+                    const readyForDeliver = checklists.find((c) => c.progress === 100 && c.car.id === checklist.car.id);
+
                     return (
-                        <Card key={index} className="relative m-2 flex-1 transition-all hover:shadow-lg sm:max-w-[50%]">
+                        <Card key={index} className="relative m-2 transition-all hover:shadow-lg">
                             <CardHeader>
                                 <div className="flex flex-col gap-2">
                                     <h1 className="flex gap-2 font-semibold text-card-foreground">
-                                        <Car color="darkblue" /> {car?.brand} {car?.model} {car?.year}
+                                        <Car className="gray dark:text-white" /> {car?.brand} {car?.model} {car?.year}
                                     </h1>
                                     <div
-                                        className={`${car ? priorityColors[car.id_priority] : ''} mb-4 w-16 rounded-sm px-2 py-1 text-center text-sm font-bold`}
+                                        className={`${car ? priorityColors[car.id_priority] : ''} w-16 rounded-sm px-2 py-1 text-center text-sm font-bold`}
                                     >
                                         <span>{car?.priority.description}</span>
                                     </div>
                                 </div>
                             </CardHeader>
+
                             <CardContent>
-                                <div className="mb-5 space-y-2">
+                                <div className="relative space-y-2">
+                                    <div className="absolute top-[-40px] right-0 flex justify-end">
+                                        <Button
+                                            variant={'outline'}
+                                            style={{ border: 'none' }}
+                                            className={`cursor-pointer bg-green-500 hover:bg-green-600 ${
+                                                readyForDeliver ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+                                            }`}
+                                            onClick={() => post(`/cars/${car.id}/${3}`)}
+                                        >
+                                            <Check />
+                                            <Truck />
+                                        </Button>
+                                    </div>
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Progress</span>
+                                        <span className="text-muted-foreground">Progresso</span>
                                         <span className="font-medium text-card-foreground">{checklist.progress}%</span>
                                     </div>
                                     <Progress value={checklist?.progress} className="h-2" />
                                     <div className="text-xs text-muted-foreground">
-                                        {completedTasks} of {totalTasks} tasks completed
+                                        {completedTasks} de {totalTasks} tarefas concluídas
                                     </div>
                                 </div>
 
@@ -117,9 +173,11 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                         <div className="flex gap-2">
                                             <div className="flex items-center gap-2">
                                                 <CalendarCheck className="h-4 w-4 text-muted-foreground" />
-                                                <span className="text-muted-foreground">Delivery:</span>
+                                                <span className="text-muted-foreground">Entrega:</span>
                                             </div>
-                                            <span className="font-medium text-card-foreground">{car?.delivery_date}</span>
+                                            <span className="font-medium text-card-foreground">
+                                                {car?.delivery_date ? format(parseISO(car.delivery_date), 'dd/MM/yyyy') : '-'}
+                                            </span>
                                         </div>
                                     )}
                                 </div>
@@ -127,7 +185,7 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                 <div className="flex flex-col gap-2">
                                     <Label className="flex gap-2 text-muted-foreground">
                                         <Clock size={15} />
-                                        Task Checklist
+                                        Lista de tarefas
                                     </Label>
                                     <div className="max-h-52 space-y-2 overflow-y-auto">
                                         {checklist.tasks.map((task) => {
@@ -149,21 +207,22 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                                                 {task.description}
                                                             </h1>
                                                         </div>
-
-                                                        <Badge variant="outline" className="text-xs">
-                                                            {task.category.description}
-                                                        </Badge>
+                                                        {task.category?.description && (
+                                                            <Badge variant="outline" className="text-xs">
+                                                                {task.category?.description}
+                                                            </Badge>
+                                                        )}
                                                     </div>
                                                 </div>
                                             );
                                         })}
                                     </div>
-
-                                    <div className="absolute top-[-1rem] right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800 sm:top-2">
-                                        <Link href={`/checklists/${checklist.id}/edit`}>
+                                    <Link href={`/checklists/${checklist.id}/edit`}>
+                                        <div className="absolute top-[-1rem] right-12 cursor-pointer rounded-sm bg-blue-500 p-2 shadow-lg transition-all hover:bg-blue-800 sm:top-2">
                                             <Edit color="white" size={20}></Edit>
-                                        </Link>
-                                    </div>
+                                        </div>
+                                    </Link>
+
                                     <Dialog>
                                         <DialogTrigger>
                                             <div className="absolute top-[-1rem] right-2 cursor-pointer rounded-sm bg-red-600 p-2 shadow-lg transition-all hover:bg-red-800 sm:top-2">

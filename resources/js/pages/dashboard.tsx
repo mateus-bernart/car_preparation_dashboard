@@ -26,28 +26,28 @@ export default function Dashboard({ cars }: { cars: Car[] }) {
             {/* ====== OVERVIEW ========= */}
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-                    <Card className="relative aspect-video h-40 w-full overflow-hidden rounded-xl border border-sidebar-border/70 bg-gray-50 p-8 dark:border-sidebar-border dark:bg-gray-800">
+                    <Card className="relative aspect-video h-35 w-full overflow-hidden rounded-sm border border-sidebar-border/70 bg-gray-50 p-8 dark:border-sidebar-border dark:bg-gray-800">
                         <div className="flex justify-between">
                             <h2 className="text-muted-foreground">Total de Carros</h2>
                             <CarIcon color="gray" size={20} />
                         </div>
                         <span className="text-2xl">{cars.length}</span>
                     </Card>
-                    <Card className="relative aspect-video h-40 w-full overflow-hidden rounded-xl border border-sidebar-border/70 bg-amber-50 p-8 dark:border-sidebar-border dark:bg-yellow-900">
+                    <Card className="relative aspect-video h-35 w-full overflow-hidden rounded-sm border border-sidebar-border/70 bg-amber-50 p-8 dark:border-sidebar-border dark:bg-yellow-900">
                         <div className="flex justify-between">
                             <h2 className="text-muted-foreground">Em preparação</h2>
                             <Clock color="gray" size={20} />
                         </div>
                         <span className="text-2xl">{cars.length}</span>
                     </Card>
-                    <Card className="relative aspect-video h-40 w-full overflow-hidden rounded-xl border border-sidebar-border/70 bg-blue-50 p-8 dark:border-sidebar-border dark:bg-blue-950">
+                    <Card className="relative aspect-video h-35 w-full overflow-hidden rounded-sm border border-sidebar-border/70 bg-blue-50 p-8 dark:border-sidebar-border dark:bg-blue-950">
                         <div className="flex justify-between">
                             <h2 className="text-muted-foreground">Pronto para entrega</h2>
                             <CheckCircle color="gray" size={20} />
                         </div>
                         <span className="text-2xl">{cars.length}</span>
                     </Card>
-                    <Card className="relative aspect-video h-40 w-full overflow-hidden rounded-xl border border-sidebar-border/70 bg-green-50 p-8 dark:border-sidebar-border dark:bg-green-950">
+                    <Card className="relative aspect-video h-35 w-full overflow-hidden rounded-sm border border-sidebar-border/70 bg-green-50 p-8 dark:border-sidebar-border dark:bg-green-950">
                         <div className="flex justify-between">
                             <h2 className="text-muted-foreground">Entregados</h2>
                             <Truck color="gray" size={20} />

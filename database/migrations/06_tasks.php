@@ -22,6 +22,7 @@ return new class extends Migration
 
             $table->text("description");
             $table->integer("status")->default(0);
+            $table->integer("is_default_task");
             $table->timestamps();
         });
     }

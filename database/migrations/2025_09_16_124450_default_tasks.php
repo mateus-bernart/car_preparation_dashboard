@@ -15,7 +15,6 @@ return new class extends Migration
             $table->bigIncrements("id");
             $table->unsignedBigInteger("id_category");
             $table->string("description");
-            $table->integer("status");
         });
     }
 
