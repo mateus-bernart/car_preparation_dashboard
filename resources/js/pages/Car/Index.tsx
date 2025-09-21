@@ -18,7 +18,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { BadgeCheckIcon, Check, ChevronDown, ListRestart, Trash, Truck, Undo } from 'lucide-react';
+import { BadgeCheckIcon, ChevronDown, ListRestart, Trash, Truck, Undo } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 import { Car } from './car';
@@ -73,6 +73,22 @@ export default function Cars() {
         {
             accessorKey: 'year',
             header: 'Ano',
+        },
+        {
+            accessorKey: 'plate_number',
+            header: 'Placa',
+        },
+        {
+            accessorKey: 'kilometers',
+            header: 'Quilometragem',
+            cell: ({ row }) => {
+                const kilometers = row.original.kilometers;
+                return <p>{kilometers?.toLocaleString('de-DE')}</p>;
+            },
+        },
+        {
+            accessorKey: 'color',
+            header: 'Cor',
         },
         {
             accessorKey: 'active',
@@ -163,15 +179,7 @@ export default function Cars() {
                         //Disponível
                     ],
                     '2': [
-                        // Em preparação
-                        {
-                            label: 'Entregue',
-                            description: (car) => `Marcar ${car.brand} - ${car.model} ${car.year} como pronto para entrega?`,
-                            onConfirm: (car) => post(`/cars/${car.id}/3`),
-                            buttonClass: 'bg-green-500 hover:bg-green-600',
-                            icon: <Check />,
-                            tooltip: 'pronto para entrega',
-                        },
+                        //Pronto para entrega
                     ],
                     '3': [
                         // Pronto para entrega
@@ -269,7 +277,11 @@ export default function Cars() {
                 </Link>
             </div>
             <div className="m-4">
-                <DataTable columns={columns} data={props.cars} searchFields={['brand', 'model', 'year', 'status', 'active']}></DataTable>
+                <DataTable
+                    columns={columns}
+                    data={props.cars}
+                    searchFields={['brand', 'model', 'year', 'status', 'active', 'plate_number', 'kilometers']}
+                ></DataTable>
             </div>
         </AppLayout>
     );

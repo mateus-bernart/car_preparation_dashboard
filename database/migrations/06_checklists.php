@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create("checklists", function (Blueprint $table) {
             $table->bigIncrements("id");
             $table->foreignId("id_user")->constrained("users")->noActionOnDelete();
-            $table->foreignId("id_car")->constrained("cars")->noActionOnDelete();
+            $table->foreignId("id_car")->constrained("cars")->onDelete('cascade');
             $table->boolean("include_default_tasks");
             $table->integer("status")->default(1);
             $table->integer("progress")->default(0);

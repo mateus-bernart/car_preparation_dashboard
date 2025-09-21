@@ -25,6 +25,9 @@ class CarController extends Controller
             'brand' => 'required|string|max:255',
             'model' => 'required|string|max:255',
             'year' => 'nullable|integer|min:1886',
+            'plate_number' => 'nullable|string|max:255',
+            'kilometers' => 'nullable|numeric|min:0', // decimal is not a valid rule for Laravel validation. It was replaced with numeric.
+            'color' => 'nullable|string|max:255', // decimal is not a valid rule for Laravel validation. It was replaced with numeric.
         ], [
             'brand.required' => 'O campo marca é obrigatório.',
             'brand.string' => 'O campo marca deve ser uma string.',
@@ -35,6 +38,8 @@ class CarController extends Controller
             'year.integer' => 'O campo ano deve ser um número inteiro.',
             'year.min' => 'O campo ano deve ser no mínimo 1886.',
         ]);
+
+        isset($validated['kilometers']) ? str_replace(',', '.', $validated['kilometers']) : null;
 
         Car::create($validated);
         return redirect()->route('cars.index')->with('success', 'Carro adicionado com sucesso.');

@@ -71,13 +71,20 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
             checklist.car.brand.toLowerCase().includes(search.toLowerCase()) ||
             checklist.car.model.toLowerCase().includes(search.toLowerCase()) ||
             String(checklist.car.year).includes(search) ||
-            String(checklist.car.priority.description).toLowerCase().includes(search.toLowerCase()) ||
+            String(checklist.car.priority.description)
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .includes(
+                    search
+                        .toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, ''),
+                ) ||
             String(checklist.car.customer?.toLowerCase()).includes(search.toLowerCase()) ||
             String(deliveryDate).includes(search)
         );
     });
-
-    const readyForDeliver = checklists.find((c) => c.progress === 100);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -109,6 +116,8 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
 
                     const completedTasks = checklist.tasks.filter((t) => t.status === 1).length;
                     const totalTasks = checklist.tasks.length;
+
+                    const readyForDeliver = checklists.find((c) => c.progress === 100 && c.car.id === checklist.car.id);
 
                     return (
                         <Card key={index} className="relative m-2 transition-all hover:shadow-lg">

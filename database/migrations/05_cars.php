@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string("brand");
             $table->string("model");
             $table->integer("year")->nullable();
+            $table->string("color")->nullable();
+            $table->string("plate_number")->nullable();
+            $table->integer("kilometers")->nullable();
             $table->string("customer")->nullable();
             $table->date("delivery_date")->nullable();
             $table->timestamps();

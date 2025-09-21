@@ -70,8 +70,9 @@ class ChecklistController extends Controller
 
     public function destroy(Checklist $checklist)
     {
-        $checklist->delete();
         $checklist->car->status = 1;
+        $checklist->car->save();
+        $checklist->delete();
         return redirect()->route('checklists.index')->with('success', 'Checklist removido com sucesso!');
     }
 }
