@@ -10,7 +10,7 @@ echo "📦 Instalando dependências do PHP..."
 composer install --no-dev --optimize-autoloader
 
 echo "🔁 Rodando migrations..."
-php artisan migrate:fresh --force --seed || true
+php artisan migrate:fresh --seed --force || true
 
 echo "🧹 Limpando caches Laravel..."
 php artisan config:clear
