@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 echo "🔧 Limpando build anterior..."
@@ -9,8 +8,14 @@ rm -f public/hot
 echo "📦 Instalando dependências do PHP..."
 composer install --no-dev --optimize-autoloader
 
-echo "🔁 Rodando migrations..."
-php artisan migrate:fresh --seed --force 
+echo "🔍 Verificando status do banco..."
+php artisan migrate:status || echo "⚠️  Tabela migrations não existe ainda"
+
+echo "🔁 Forçando recriação das tabelas e executando seeders..."
+php artisan migrate:fresh --seed --force
+
+echo "✅ Verificando se seeders rodaram..."
+php artisan tinker --execute="echo 'Usuários: ' . App\\Models\\User::count();"
 
 echo "🧹 Limpando caches Laravel..."
 php artisan config:clear
