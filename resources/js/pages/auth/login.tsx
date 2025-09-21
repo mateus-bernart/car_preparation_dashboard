@@ -28,13 +28,13 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     };
 
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
+        <AuthLayout title="Entre em sua conta" description="Informe o email e a senha abaixo">
             <Head title="Log in" />
 
             <form onSubmit={submit} className="flex flex-col gap-6">
                 <div className="grid gap-6">
                     <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
+                        <Label htmlFor="email">Email</Label>
                         <Input
                             id="email"
                             type="email"
@@ -45,17 +45,17 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             autoFocus
                             tabIndex={1}
                             autoComplete="email"
-                            placeholder="email@example.com"
+                            placeholder="email@exemplo.com"
                         />
                         <InputError message={errors.email} />
                     </div>
 
                     <div className="grid gap-2">
                         <div className="flex items-center">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">Senha</Label>
                             {canResetPassword && (
                                 <TextLink href={request()} className="ml-auto text-sm" tabIndex={5}>
-                                    Forgot password?
+                                    Esqueceu a senha?
                                 </TextLink>
                             )}
                         </div>
@@ -68,7 +68,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             required
                             tabIndex={2}
                             autoComplete="current-password"
-                            placeholder="Password"
+                            placeholder="Senha"
                         />
                         <InputError message={errors.password} />
                     </div>
@@ -81,7 +81,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             onCheckedChange={(value) => setData('remember', Boolean(value))}
                             tabIndex={3}
                         />
-                        <Label htmlFor="remember">Remember me</Label>
+                        <Label htmlFor="remember">Lembrar-se de mim</Label>
                     </div>
 
                     <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
@@ -91,9 +91,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 </div>
 
                 <div className="text-center text-sm text-muted-foreground">
-                    Don't have an account?{' '}
+                    Não tem uma conta?{' '}
                     <TextLink href={register()} tabIndex={5}>
-                        Sign up
+                        Cadastre-se
                     </TextLink>
                 </div>
             </form>

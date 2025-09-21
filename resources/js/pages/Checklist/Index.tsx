@@ -14,6 +14,7 @@ import { CalendarCheck, Car, Check, Clock, Edit, Search, Trash, Truck, User } fr
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Checklist, ChecklistFormData } from './types/checklist';
+import clsx from 'clsx';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -108,12 +109,6 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                 {filteredCarChecklist.map((checklist, index) => {
                     const car = checklist.car;
 
-                    const priorityColors: Record<number, string> = {
-                        1: 'bg-green-500',
-                        2: 'bg-amber-500',
-                        3: 'bg-red-500',
-                    };
-
                     const completedTasks = checklist.tasks.filter((t) => t.status === 1).length;
                     const totalTasks = checklist.tasks.length;
 
@@ -127,7 +122,12 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                         <Car className="gray dark:text-white" /> {car?.brand} {car?.model} {car?.year}
                                     </h1>
                                     <div
-                                        className={`${car ? priorityColors[car.id_priority] : ''} w-16 rounded-sm px-2 py-1 text-center text-sm font-bold`}
+                                        className={clsx(
+                                            'w-16 rounded-sm px-2 py-1 text-center text-sm font-bold',
+                                            car?.id_priority === 1 && 'bg-green-500',
+                                            car?.id_priority === 2 && 'bg-amber-500',
+                                            car?.id_priority === 3 && 'bg-red-500',
+                                        )}
                                     >
                                         <span>{car?.priority.description}</span>
                                     </div>

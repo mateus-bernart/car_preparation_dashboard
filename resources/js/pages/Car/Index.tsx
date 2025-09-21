@@ -115,7 +115,11 @@ export default function Cars() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className={car.active.toString() === '1' ? 'bg-green-100 hover:bg-green-200' : 'bg-red-100 hover:bg-red-200'}
+                                className={
+                                    car.active.toString() === '1'
+                                        ? 'bg-green-100 hover:bg-green-200 dark:bg-green-300 dark:text-black dark:hover:bg-green-100'
+                                        : 'bg-red-100 hover:bg-red-200 dark:bg-red-300 dark:text-black dark:hover:bg-red-100'
+                                }
                                 style={{ border: 'none' }}
                             >
                                 {statusOption}
@@ -142,13 +146,13 @@ export default function Cars() {
                     case '2':
                         statusText = 'Em preparação';
                         variant = 'outline';
-                        className = 'bg-amber-300';
+                        className = 'bg-amber-300 dark:text-black';
                         break;
                     case '3':
                         statusText = 'Pronto para entrega';
                         variant = 'outline';
                         iconElement = <Truck />;
-                        className = 'bg-green-300';
+                        className = 'bg-green-300 dark:text-black';
                         break;
                     case '4':
                         statusText = 'Entregue';
@@ -199,7 +203,7 @@ export default function Cars() {
                             label: 'Em preparação',
                             description: (car) => `Marcar ${car.brand} - ${car.model} ${car.year} para "Em preparação"?`,
                             onConfirm: (car) => post(`/cars/${car.id}/2`),
-                            buttonClass: 'bg-amber-200 hover:bg-amber-300',
+                            buttonClass: 'bg-amber-200 hover:bg-amber-300 dark:text-black dark:hover:bg-amber-700',
                             icon: <ListRestart />,
                             tooltip: 'em preparação',
                         },
@@ -207,7 +211,7 @@ export default function Cars() {
                             label: 'Entregue',
                             description: (car) => `Marcar ${car.brand} - ${car.model} ${car.year} como entregue?`,
                             onConfirm: (car) => post(`/cars/${car.id}/4`),
-                            buttonClass: 'bg-green-500 hover:bg-green-600',
+                            buttonClass: 'bg-green-500 hover:bg-green-600 dark:hover:bg-green-800',
                             icon: <Truck />,
                             tooltip: 'entregue',
                         },
@@ -218,7 +222,7 @@ export default function Cars() {
                             label: 'Entregue',
                             description: (car) => `Marcar ${car.brand} - ${car.model} ${car.year} como pronto para entrega?`,
                             onConfirm: (car) => post(`/cars/${car.id}/3`),
-                            buttonClass: 'bg-amber-200 hover:bg-amber-300',
+                            buttonClass: 'bg-amber-200 hover:bg-amber-300 dark:text-black dark:hover:bg-amber-700',
                             icon: <Undo />,
                             tooltip: 'pronto para entrega',
                         },
@@ -256,7 +260,12 @@ export default function Cars() {
 
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive" className="hover:bg-red-700" size="icon" disabled={processing}>
+                                <Button
+                                    variant="destructive"
+                                    className="hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-800"
+                                    size="icon"
+                                    disabled={processing}
+                                >
                                     <Trash />
                                 </Button>
                             </AlertDialogTrigger>

@@ -20,6 +20,11 @@ export default function Dashboard({ cars }: { cars: Car[] }) {
         console.log(event.target.value);
     }
 
+    const totalCars = cars.length;
+    const inPreparation = cars.filter((c) => c.status.toString() === '2').length;
+    const readyForDelivery = cars.filter((c) => c.status.toString() === '3').length;
+    const delivered = cars.filter((c) => c.status.toString() === '4').length;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -31,28 +36,28 @@ export default function Dashboard({ cars }: { cars: Car[] }) {
                             <h2 className="text-muted-foreground">Total de Carros</h2>
                             <CarIcon color="gray" size={20} />
                         </div>
-                        <span className="text-2xl">{cars.length}</span>
+                        <span className="text-2xl">{totalCars}</span>
                     </Card>
                     <Card className="relative aspect-video h-35 w-full overflow-hidden rounded-sm border border-sidebar-border/70 bg-amber-50 p-8 dark:border-sidebar-border dark:bg-yellow-900">
                         <div className="flex justify-between">
                             <h2 className="text-muted-foreground">Em preparação</h2>
                             <Clock color="gray" size={20} />
                         </div>
-                        <span className="text-2xl">{cars.length}</span>
+                        <span className="text-2xl">{inPreparation}</span>
                     </Card>
                     <Card className="relative aspect-video h-35 w-full overflow-hidden rounded-sm border border-sidebar-border/70 bg-blue-50 p-8 dark:border-sidebar-border dark:bg-blue-950">
                         <div className="flex justify-between">
                             <h2 className="text-muted-foreground">Pronto para entrega</h2>
                             <CheckCircle color="gray" size={20} />
                         </div>
-                        <span className="text-2xl">{cars.length}</span>
+                        <span className="text-2xl">{readyForDelivery}</span>
                     </Card>
                     <Card className="relative aspect-video h-35 w-full overflow-hidden rounded-sm border border-sidebar-border/70 bg-green-50 p-8 dark:border-sidebar-border dark:bg-green-950">
                         <div className="flex justify-between">
-                            <h2 className="text-muted-foreground">Entregados</h2>
+                            <h2 className="text-muted-foreground">Entregues</h2>
                             <Truck color="gray" size={20} />
                         </div>
-                        <span className="text-2xl">{cars.length}</span>
+                        <span className="text-2xl">{delivered}</span>
                     </Card>
                 </div>
 
