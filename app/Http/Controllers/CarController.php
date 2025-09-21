@@ -24,7 +24,8 @@ class CarController extends Controller
     public function store(CarRequest $request, CarService $service)
     {
         $service->save($request->validated());
-        return to_route('cars.index')->with('success', 'Carro adicionado com sucesso.');
+        return redirect()->route('cars.index')
+            ->with('success', 'Carro adicionado com sucesso.');
     }
 
     public function update(CarRequest $request, CarService $service, Car $car)
