@@ -9,7 +9,6 @@ import { Progress } from '@/components/ui/progress';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import clsx from 'clsx';
 import { format, parseISO } from 'date-fns';
 import { CalendarCheck, Car, Check, Clock, Edit, Search, Trash, Truck, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -114,6 +113,11 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
 
                     const readyForDeliver = checklists.find((c) => c.progress === 100 && c.car.id === checklist.car.id);
 
+                    const priorityColors: Record<string, string> = {
+                        '1': 'bg-green-500',
+                        '2': 'bg-amber-500',
+                        '3': 'bg-red-500',
+                    };
                     return (
                         <Card key={index} className="relative m-2 transition-all hover:shadow-lg">
                             <CardHeader>
@@ -121,14 +125,8 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                     <h1 className="flex gap-2 font-semibold text-card-foreground">
                                         <Car className="gray dark:text-white" /> {car?.brand} {car?.model} {car?.year}
                                     </h1>
-                                    <div className="hidden bg-amber-500 bg-gray-500 bg-green-500 bg-red-500"></div>
                                     <div
-                                        className={clsx(
-                                            'w-16 rounded-sm px-2 py-1 text-center text-sm font-bold',
-                                            car?.id_priority?.toString() === '1' && 'bg-green-500',
-                                            car?.id_priority?.toString() === '2' && 'bg-amber-500',
-                                            car?.id_priority?.toString() === '3' && 'bg-red-500',
-                                        )}
+                                        className={`w-16 rounded-sm px-2 py-1 text-center text-sm font-bold ${priorityColors[car?.id_priority?.toString() || '1']}`}
                                     >
                                         <span>{car?.priority.description}</span>
                                     </div>
