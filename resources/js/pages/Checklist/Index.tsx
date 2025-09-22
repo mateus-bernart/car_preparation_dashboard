@@ -9,12 +9,12 @@ import { Progress } from '@/components/ui/progress';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import clsx from 'clsx';
 import { format, parseISO } from 'date-fns';
 import { CalendarCheck, Car, Check, Clock, Edit, Search, Trash, Truck, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Checklist, ChecklistFormData } from './types/checklist';
-import clsx from 'clsx';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -124,9 +124,9 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                     <div
                                         className={clsx(
                                             'w-16 rounded-sm px-2 py-1 text-center text-sm font-bold',
-                                            car?.id_priority === 1 && 'bg-green-500',
-                                            car?.id_priority === 2 && 'bg-amber-500',
-                                            car?.id_priority === 3 && 'bg-red-500',
+                                            car?.id_priority?.toString() === '1' && 'bg-green-500',
+                                            car?.id_priority?.toString() === '2' && 'bg-amber-500',
+                                            car?.id_priority?.toString() === '3' && 'bg-red-500',
                                         )}
                                     >
                                         <span>{car?.priority.description}</span>
