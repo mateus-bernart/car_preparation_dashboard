@@ -121,6 +121,7 @@ export default function Checklists({ checklists }: { checklists: Checklist[] }) 
                                     <h1 className="flex gap-2 font-semibold text-card-foreground">
                                         <Car className="gray dark:text-white" /> {car?.brand} {car?.model} {car?.year}
                                     </h1>
+                                    <div className="hidden bg-amber-500 bg-gray-500 bg-green-500 bg-red-500"></div>
                                     <div
                                         className={clsx(
                                             'w-16 rounded-sm px-2 py-1 text-center text-sm font-bold',
