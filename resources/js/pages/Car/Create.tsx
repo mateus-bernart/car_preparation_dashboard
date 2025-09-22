@@ -47,7 +47,7 @@ export default function Create({ car }: { car: Car }) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create car" />
+            <Head title="Adicionar Carro" />
             <Card className="m-6">
                 <CardHeader className="text-l font-serif font-bold">Adicionar novo carro</CardHeader>
                 <CardContent>

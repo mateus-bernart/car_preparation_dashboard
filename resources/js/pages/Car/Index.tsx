@@ -290,7 +290,7 @@ export default function Cars() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Cars" />
+            <Head title="Carros" />
 
             <div className="my-4 ml-4">
                 <Link href={'/cars/create'}>
